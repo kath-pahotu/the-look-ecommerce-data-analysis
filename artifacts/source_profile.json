@@ -1,0 +1,131 @@
+[
+  {
+    "file": "users.csv",
+    "bytes": 16566424,
+    "rows": 100000,
+    "columns": [
+      "id",
+      "first_name",
+      "last_name",
+      "email",
+      "age",
+      "gender",
+      "state",
+      "street_address",
+      "postal_code",
+      "city",
+      "country",
+      "latitude",
+      "longitude",
+      "traffic_source",
+      "created_at"
+    ],
+    "sha256": "695dbb4aedc358c28174a515714a9642e1ef792f837fa460e51ea57993925245"
+  },
+  {
+    "file": "products.csv",
+    "bytes": 4316084,
+    "rows": 29120,
+    "columns": [
+      "id",
+      "cost",
+      "category",
+      "name",
+      "brand",
+      "retail_price",
+      "department",
+      "sku",
+      "distribution_center_id"
+    ],
+    "sha256": "b38f1c006daaebbeb09cd6d0e22068f2a29ea4b48c8a920edcb056e1f3bfc5b7"
+  },
+  {
+    "file": "orders.csv",
+    "bytes": 9733931,
+    "rows": 124814,
+    "columns": [
+      "order_id",
+      "user_id",
+      "status",
+      "gender",
+      "created_at",
+      "returned_at",
+      "shipped_at",
+      "delivered_at",
+      "num_of_item"
+    ],
+    "sha256": "dce6a83f16a270cf69cd3a3b79a3ee25814ecae56d50ad706b482ded234e2c05"
+  },
+  {
+    "file": "order_items.csv",
+    "bytes": 18883612,
+    "rows": 180862,
+    "columns": [
+      "id",
+      "order_id",
+      "user_id",
+      "product_id",
+      "inventory_item_id",
+      "status",
+      "created_at",
+      "shipped_at",
+      "delivered_at",
+      "returned_at",
+      "sale_price"
+    ],
+    "sha256": "becc82efe86082f29b47dc8a0460b625104a1db3b4acb4315df4f1f245af5bd9"
+  },
+  {
+    "file": "events.csv",
+    "bytes": 384444587,
+    "rows": 2420661,
+    "columns": [
+      "id",
+      "user_id",
+      "sequence_number",
+      "session_id",
+      "created_at",
+      "ip_address",
+      "city",
+      "state",
+      "postal_code",
+      "browser",
+      "traffic_source",
+      "uri",
+      "event_type"
+    ],
+    "sha256": "0cb3f3c4a17be80473a47b2ba27fe8052ee0615f935bb204a5d07dc7a1475dc9"
+  },
+  {
+    "file": "inventory_events.csv",
+    "bytes": 91956433,
+    "rows": 488146,
+    "columns": [
+      "id",
+      "product_id",
+      "created_at",
+      "sold_at",
+      "cost",
+      "product_category",
+      "product_name",
+      "product_brand",
+      "product_retail_price",
+      "product_department",
+      "product_sku",
+      "product_distribution_center_id"
+    ],
+    "sha256": "8168c7e4cfec08df7e23232af03b1fc94b209d4eae7109fb328a6402be32069c"
+  },
+  {
+    "file": "distribution_centers.csv",
+    "bytes": 368,
+    "rows": 10,
+    "columns": [
+      "id",
+      "name",
+      "latitude",
+      "longitude"
+    ],
+    "sha256": "6d9ba37bdb2d56fbeb04a51c624e2e788ea33b6f281d22b4751896068bdd0fa6"
+  }
+]

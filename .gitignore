@@ -1,0 +1,19 @@
+# Large binary / generated files — rebuild locally by running the pipeline
+artifacts/practice_analytics.duckdb
+data/processed/power_bi/
+
+# Power BI binary (large, doesn't diff in git — commit the .pbix from Power BI Desktop directly)
+*.pbix
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.egg-info/
+.env
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

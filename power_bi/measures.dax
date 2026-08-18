@@ -1,0 +1,240 @@
+// =====================================================================
+// The Look Ecommerce - DAX measure answer key
+//
+// HOW TO USE
+//   - Try writing each measure yourself in Power BI (New measure), then
+//     check it against this file. This is your answer key, not a shortcut.
+//   - Paste-ready: each measure is written exactly as you'd type it in the
+//     Power BI formula bar (measure name on the left, no square brackets).
+//   - References to OTHER measures use [Square Brackets]; columns use
+//     table[column].
+//
+// PREREQUISITES
+//   - Relationships built (facts -> dims), single-direction, many-to-one.
+//   - dim_date marked as a date table on dim_date[calendar_date]
+//     (needed for the TIME INTELLIGENCE section).
+//   - Lead-time measures deliberately EXCLUDE rows where
+//     valid_timeline_flag = 0 (the ~19.6% invalid timelines).
+// =====================================================================
+
+
+// ---------------------------------------------------------------------
+// COMMERCIAL  (fact_order_item)
+// ---------------------------------------------------------------------
+
+Gross Sales = SUM ( fact_order_item[gross_sales_value] )
+
+Cancelled Value = SUM ( fact_order_item[cancelled_value] )
+
+Returned Value = SUM ( fact_order_item[returned_value] )
+
+Net Sales = SUM ( fact_order_item[net_sales_value] )
+
+Gross Margin = SUM ( fact_order_item[gross_margin_value] )
+
+Net Profit = SUM ( fact_order_item[net_profit_value] )
+
+Gross Margin % = DIVIDE ( [Gross Margin], [Gross Sales] )
+
+Net Margin % = DIVIDE ( [Net Profit], [Net Sales] )
+
+Sales Leakage % = DIVIDE ( [Cancelled Value] + [Returned Value], [Gross Sales] )
+
+
+// ---------------------------------------------------------------------
+// VOLUME & AVERAGES  (fact_order_item)
+// ---------------------------------------------------------------------
+
+Orders = DISTINCTCOUNT ( fact_order_item[order_id] )
+
+Order Items = COUNTROWS ( fact_order_item )
+
+Customers = DISTINCTCOUNT ( fact_order_item[customer_id] )
+
+Units Sold =
+CALCULATE (
+    COUNTROWS ( fact_order_item ),
+    fact_order_item[cancelled_item_flag] = 0
+)
+
+Average Order Value = DIVIDE ( [Net Sales], [Orders] )
+
+Average Items per Order = DIVIDE ( [Order Items], [Orders] )
+
+Average Selling Price = DIVIDE ( [Net Sales], [Units Sold] )
+
+Sales per Customer = DIVIDE ( [Net Sales], [Customers] )
+
+Orders per Customer = DIVIDE ( [Orders], [Customers] )
+
+
+// ---------------------------------------------------------------------
+// RETURNS & CANCELLATIONS  (fact_order_item)
+// ---------------------------------------------------------------------
+
+Returned Items = SUM ( fact_order_item[returned_item_flag] )
+
+Cancelled Items = SUM ( fact_order_item[cancelled_item_flag] )
+
+Cancellation Rate = DIVIDE ( [Cancelled Items], [Order Items] )
+
+// Return rate over items eligible to be observed as returned
+Return Rate =
+DIVIDE (
+    [Returned Items],
+    SUM ( fact_order_item[return_observation_eligible_flag] )
+)
+
+
+// ---------------------------------------------------------------------
+// FUNNEL & TRAFFIC  (fact_session)
+// ---------------------------------------------------------------------
+
+Sessions = COUNTROWS ( fact_session )
+
+Product View Sessions = SUM ( fact_session[product_view_flag] )
+
+Cart Sessions = SUM ( fact_session[cart_flag] )
+
+Purchase Sessions = SUM ( fact_session[purchase_flag] )
+
+Session Conversion Rate = DIVIDE ( [Purchase Sessions], [Sessions] )
+
+View to Cart Rate = DIVIDE ( [Cart Sessions], [Product View Sessions] )
+
+Cart to Purchase Rate = DIVIDE ( [Purchase Sessions], [Cart Sessions] )
+
+Cart Abandonment Rate =
+DIVIDE ( SUM ( fact_session[cart_abandoned_flag] ), [Cart Sessions] )
+
+Avg Session Duration (min) =
+DIVIDE ( AVERAGE ( fact_session[session_duration_seconds] ), 60 )
+
+Identified Session Rate =
+DIVIDE ( SUM ( fact_session[identified_session_flag] ), [Sessions] )
+
+
+// ---------------------------------------------------------------------
+// OPERATIONS - LEAD TIME  (fact_order_item, valid timelines only)
+// ---------------------------------------------------------------------
+
+Avg Ship Lead Days =
+CALCULATE (
+    AVERAGE ( fact_order_item[ship_lead_days] ),
+    fact_order_item[valid_timeline_flag] = 1
+)
+
+Avg Delivery Lead Days =
+CALCULATE (
+    AVERAGE ( fact_order_item[delivery_lead_days] ),
+    fact_order_item[valid_timeline_flag] = 1
+)
+
+Avg End to End Lead Days =
+CALCULATE (
+    AVERAGE ( fact_order_item[end_to_end_lead_days] ),
+    fact_order_item[valid_timeline_flag] = 1
+)
+
+Avg Return Cycle Days =
+CALCULATE (
+    AVERAGE ( fact_order_item[return_cycle_days] ),
+    fact_order_item[valid_timeline_flag] = 1
+)
+
+
+// ---------------------------------------------------------------------
+// INVENTORY  (fact_inventory)
+// ---------------------------------------------------------------------
+
+Inventory Units = COUNTROWS ( fact_inventory )
+
+Inventory Units Sold = SUM ( fact_inventory[sold_flag] )
+
+Inventory Units Unsold = [Inventory Units] - [Inventory Units Sold]
+
+Sell Through Rate = DIVIDE ( [Inventory Units Sold], [Inventory Units] )
+
+Avg Days to Sell =
+CALCULATE (
+    AVERAGE ( fact_inventory[days_to_sell] ),
+    fact_inventory[sold_flag] = 1
+)
+
+Unsold Inventory Cost =
+CALCULATE (
+    SUM ( fact_inventory[unit_cost] ),
+    fact_inventory[sold_flag] = 0
+)
+
+Unsold Inventory Retail Value =
+CALCULATE (
+    SUM ( fact_inventory[retail_price] ),
+    fact_inventory[sold_flag] = 0
+)
+
+
+// ---------------------------------------------------------------------
+// TIME INTELLIGENCE  (requires dim_date marked as a date table)
+// ---------------------------------------------------------------------
+
+Net Sales LY =
+CALCULATE ( [Net Sales], SAMEPERIODLASTYEAR ( dim_date[calendar_date] ) )
+
+Net Sales YoY % =
+DIVIDE ( [Net Sales] - [Net Sales LY], [Net Sales LY] )
+
+Net Sales YTD =
+TOTALYTD ( [Net Sales], dim_date[calendar_date] )
+
+Net Sales MTD =
+TOTALMTD ( [Net Sales], dim_date[calendar_date] )
+
+Net Sales Prev Month =
+CALCULATE ( [Net Sales], DATEADD ( dim_date[calendar_date], -1, MONTH ) )
+
+Net Sales MoM % =
+DIVIDE ( [Net Sales] - [Net Sales Prev Month], [Net Sales Prev Month] )
+
+
+// ---------------------------------------------------------------------
+// YoY COMPARISON & DIRECTION LABELS  (requires dim_date as a date table)
+//   - "... LY"      = same metric one year earlier
+//   - "... YoY %"   = numeric % change (use for conditional colour)
+//   - "... YoY Label" = arrow + % text, e.g. "▲ 12.4%" (drop on a card)
+// ---------------------------------------------------------------------
+
+Net Profit LY =
+CALCULATE ( [Net Profit], DATEADD ( dim_date[calendar_date], -1, YEAR ) )
+
+Net Profit YoY % =
+DIVIDE ( [Net Profit] - [Net Profit LY], [Net Profit LY] )
+
+Orders LY =
+CALCULATE ( [Orders], DATEADD ( dim_date[calendar_date], -1, YEAR ) )
+
+Orders YoY % =
+DIVIDE ( [Orders] - [Orders LY], [Orders LY] )
+
+AOV LY =
+CALCULATE ( [Average Order Value], DATEADD ( dim_date[calendar_date], -1, YEAR ) )
+
+AOV YoY % =
+DIVIDE ( [Average Order Value] - [AOV LY], [AOV LY] )
+
+// Arrow + % text labels (▲ up / ▼ down). Blank when there is no prior year.
+Net Sales YoY Label =
+VAR y = [Net Sales YoY %]
+RETURN IF ( ISBLANK ( y ), "", IF ( y >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( y ), "0.0%" ) )
+
+Net Profit YoY Label =
+VAR y = [Net Profit YoY %]
+RETURN IF ( ISBLANK ( y ), "", IF ( y >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( y ), "0.0%" ) )
+
+Orders YoY Label =
+VAR y = [Orders YoY %]
+RETURN IF ( ISBLANK ( y ), "", IF ( y >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( y ), "0.0%" ) )
+
+AOV YoY Label =
+VAR y = [AOV YoY %]
+RETURN IF ( ISBLANK ( y ), "", IF ( y >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( y ), "0.0%" ) )

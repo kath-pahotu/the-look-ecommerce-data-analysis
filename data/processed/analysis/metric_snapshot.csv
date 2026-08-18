@@ -1,0 +1,2 @@
+snapshot_at,customers,products,orders,order_items,sessions,inventory_units,gross_sales_value,net_sales_value,net_profit_value,returned_items,cancelled_items
+2026-08-11 12:09:10.986684+07,100000,29120,124814,180862,680862,488146,10796335.701331269,8096531.478517488,4201367.012843427,18041,27072

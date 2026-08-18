@@ -1,0 +1,10 @@
+metric_name,source_layer,modeled_layer,source_value,modeled_value,variance,tolerance,status
+orders_rows,stg.orders,core.fact_order,124814.0,124814.0,0.0,0.00,PASS
+order_items_rows,stg.order_items,core.fact_order_item,180862.0,180862.0,0.0,0.00,PASS
+inventory_rows,stg.inventory_events,core.fact_inventory,488146.0,488146.0,0.0,0.00,PASS
+sessions_from_events,stg.events,core.fact_session,680862.0,680862.0,0.0,0.00,PASS
+events_into_sessions,stg.events,core.fact_session,2420661.0,2420661.0,0.0,0.00,PASS
+gross_sales_value,stg.order_items,core.fact_order_item,10796335.701331269,10796335.701331269,0.0,0.01,PASS
+gross_sales_fact_to_monthly_mart,core.fact_order_item,mart.sales_monthly,10796335.701331269,10796335.701331269,0.0,0.01,PASS
+net_sales_fact_to_monthly_mart,core.fact_order_item,mart.sales_monthly,8096531.478517488,8096531.478517488,0.0,0.01,PASS
+net_profit_fact_to_monthly_mart,core.fact_order_item,mart.sales_monthly,4201367.012843389,4201367.012843439,-5.029141902923584e-08,0.01,PASS

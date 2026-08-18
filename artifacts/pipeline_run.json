@@ -1,0 +1,282 @@
+{
+  "database_path": "c:\\Users\\phanh\\data_analysis\\p_projects\\the_look_ecommerce\\practice_analysis\\artifacts\\practice_analytics.duckdb",
+  "source_csv_dir": "C:\\Users\\phanh\\data_analysis\\p_projects\\the_look_ecommerce\\original_analysis\\5_the_look_ecommerce\\csv_version\\3_thelookecommerce",
+  "source_inventory": [
+    {
+      "file": "users.csv",
+      "bytes": 16566424,
+      "sha256": "695dbb4aedc358c28174a515714a9642e1ef792f837fa460e51ea57993925245"
+    },
+    {
+      "file": "products.csv",
+      "bytes": 4316084,
+      "sha256": "b38f1c006daaebbeb09cd6d0e22068f2a29ea4b48c8a920edcb056e1f3bfc5b7"
+    },
+    {
+      "file": "orders.csv",
+      "bytes": 9733931,
+      "sha256": "dce6a83f16a270cf69cd3a3b79a3ee25814ecae56d50ad706b482ded234e2c05"
+    },
+    {
+      "file": "order_items.csv",
+      "bytes": 18883612,
+      "sha256": "becc82efe86082f29b47dc8a0460b625104a1db3b4acb4315df4f1f245af5bd9"
+    },
+    {
+      "file": "events.csv",
+      "bytes": 384444587,
+      "sha256": "0cb3f3c4a17be80473a47b2ba27fe8052ee0615f935bb204a5d07dc7a1475dc9"
+    },
+    {
+      "file": "inventory_events.csv",
+      "bytes": 91956433,
+      "sha256": "8168c7e4cfec08df7e23232af03b1fc94b209d4eae7109fb328a6402be32069c"
+    },
+    {
+      "file": "distribution_centers.csv",
+      "bytes": 368,
+      "sha256": "6d9ba37bdb2d56fbeb04a51c624e2e788ea33b6f281d22b4751896068bdd0fa6"
+    }
+  ],
+  "raw_row_counts": {
+    "users": 100000,
+    "products": 29120,
+    "orders": 124814,
+    "order_items": 180862,
+    "events": 2420661,
+    "inventory_events": 488146,
+    "distribution_centers": 10
+  },
+  "sql_modules": [
+    {
+      "module": "01_staging.sql",
+      "seconds": 0.038
+    },
+    {
+      "module": "02_core_dimensions.sql",
+      "seconds": 0.996
+    },
+    {
+      "module": "03_core_facts.sql",
+      "seconds": 2.233
+    },
+    {
+      "module": "04_mart_acquisition_funnel.sql",
+      "seconds": 0.12
+    },
+    {
+      "module": "05_mart_commercial_customer.sql",
+      "seconds": 1.186
+    },
+    {
+      "module": "06_mart_operations_inventory.sql",
+      "seconds": 0.087
+    },
+    {
+      "module": "07_quality_and_snapshots.sql",
+      "seconds": 2.575
+    }
+  ],
+  "exports": [
+    {
+      "schema": "core",
+      "table": "dim_date",
+      "rows": 1994
+    },
+    {
+      "schema": "core",
+      "table": "dim_customer",
+      "rows": 100000
+    },
+    {
+      "schema": "core",
+      "table": "dim_product",
+      "rows": 29120
+    },
+    {
+      "schema": "core",
+      "table": "dim_distribution_center",
+      "rows": 10
+    },
+    {
+      "schema": "core",
+      "table": "dim_session_traffic_source",
+      "rows": 5
+    },
+    {
+      "schema": "core",
+      "table": "dim_acquisition_source",
+      "rows": 5
+    },
+    {
+      "schema": "core",
+      "table": "fact_order",
+      "rows": 124814
+    },
+    {
+      "schema": "core",
+      "table": "fact_order_item",
+      "rows": 180862
+    },
+    {
+      "schema": "core",
+      "table": "fact_session",
+      "rows": 680862
+    },
+    {
+      "schema": "core",
+      "table": "fact_inventory",
+      "rows": 488146
+    },
+    {
+      "schema": "mart",
+      "table": "funnel_stage_channel",
+      "rows": 20
+    },
+    {
+      "schema": "mart",
+      "table": "funnel_monthly_channel",
+      "rows": 325
+    },
+    {
+      "schema": "mart",
+      "table": "channel_quality",
+      "rows": 5
+    },
+    {
+      "schema": "mart",
+      "table": "acquisition_source_value",
+      "rows": 5
+    },
+    {
+      "schema": "mart",
+      "table": "cart_abandonment_segments",
+      "rows": 22
+    },
+    {
+      "schema": "mart",
+      "table": "sales_monthly",
+      "rows": 65
+    },
+    {
+      "schema": "mart",
+      "table": "customer_360",
+      "rows": 80095
+    },
+    {
+      "schema": "mart",
+      "table": "cohort_retention",
+      "rows": 1936
+    },
+    {
+      "schema": "mart",
+      "table": "product_performance_category",
+      "rows": 36
+    },
+    {
+      "schema": "mart",
+      "table": "product_performance_brand",
+      "rows": 2755
+    },
+    {
+      "schema": "mart",
+      "table": "geography_performance_country",
+      "rows": 15
+    },
+    {
+      "schema": "mart",
+      "table": "delivery_performance_dc",
+      "rows": 10
+    },
+    {
+      "schema": "mart",
+      "table": "operations_monthly",
+      "rows": 65
+    },
+    {
+      "schema": "mart",
+      "table": "return_risk_segments",
+      "rows": 48
+    },
+    {
+      "schema": "mart",
+      "table": "inventory_performance",
+      "rows": 356
+    }
+  ],
+  "analysis_exports": [
+    {
+      "schema": "qa",
+      "table": "metric_snapshot",
+      "rows": 1
+    },
+    {
+      "schema": "mart",
+      "table": "channel_quality",
+      "rows": 5
+    },
+    {
+      "schema": "mart",
+      "table": "funnel_monthly_channel",
+      "rows": 325
+    },
+    {
+      "schema": "mart",
+      "table": "acquisition_source_value",
+      "rows": 5
+    },
+    {
+      "schema": "mart",
+      "table": "cart_abandonment_segments",
+      "rows": 22
+    },
+    {
+      "schema": "mart",
+      "table": "sales_monthly",
+      "rows": 65
+    },
+    {
+      "schema": "mart",
+      "table": "product_performance_category",
+      "rows": 36
+    },
+    {
+      "schema": "mart",
+      "table": "product_performance_brand",
+      "rows": 2755
+    },
+    {
+      "schema": "mart",
+      "table": "geography_performance_country",
+      "rows": 15
+    },
+    {
+      "schema": "mart",
+      "table": "cohort_retention",
+      "rows": 1936
+    },
+    {
+      "schema": "mart",
+      "table": "delivery_performance_dc",
+      "rows": 10
+    },
+    {
+      "schema": "mart",
+      "table": "operations_monthly",
+      "rows": 65
+    },
+    {
+      "schema": "mart",
+      "table": "return_risk_segments",
+      "rows": 48
+    },
+    {
+      "schema": "mart",
+      "table": "inventory_performance",
+      "rows": 356
+    }
+  ],
+  "elapsed_seconds": 21.972,
+  "session_source": "events.csv grouped by session_id",
+  "legacy_dim_sessions_required": false
+}

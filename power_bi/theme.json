@@ -1,0 +1,88 @@
+{
+  "name": "The Look Ecommerce - Minimalist",
+  "dataColors": [
+    "#2D3A6E",
+    "#051319",
+    "#7A83B8",
+    "#C9CEEC",
+    "#4C5688",
+    "#A9AFCF",
+    "#5B6B7D",
+    "#E1E2E3"
+  ],
+  "good": "#2D3A6E",
+  "neutral": "#C9CEEC",
+  "bad": "#051319",
+  "maximum": "#2D3A6E",
+  "center": "#C9CEEC",
+  "minimum": "#EFF0F9",
+  "null": "#E1E2E3",
+  "foreground": "#051319",
+  "foregroundNeutralSecondary": "#5B6B7D",
+  "foregroundNeutralTertiary": "#A9AFCF",
+  "background": "#FFFFFF",
+  "backgroundLight": "#EFF0F9",
+  "backgroundNeutral": "#E1E2E3",
+  "tableAccent": "#2D3A6E",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 16,
+      "color": "#051319"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12,
+      "color": "#051319"
+    },
+    "callout": {
+      "fontFace": "Segoe UI",
+      "fontSize": 28,
+      "color": "#2D3A6E"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#5B6B7D"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#FFFFFF" } },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#E1E2E3" } },
+            "radius": 8
+          }
+        ],
+        "title": [
+          {
+            "show": true,
+            "fontColor": { "solid": { "color": "#051319" } },
+            "fontSize": 12,
+            "fontFamily": "Segoe UI Semibold",
+            "alignment": "left"
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": { "solid": { "color": "#EFF0F9" } },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

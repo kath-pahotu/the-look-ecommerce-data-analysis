@@ -1,0 +1,23 @@
+check_name,layer,severity,failure_count,denominator,blocking,handling_rule,status,failure_rate
+dim_customer_key_unique,core,CRITICAL,0,100000,1,Every customer must have one unique user_id,PASS,0.0
+dim_product_key_unique,core,CRITICAL,0,29120,1,Every product must have one unique product_id,PASS,0.0
+dim_date_key_unique,core,CRITICAL,0,1994,1,Every calendar date must have one unique date_key,PASS,0.0
+dim_distribution_center_key_unique,core,CRITICAL,0,10,1,Every distribution center must have one unique ID,PASS,0.0
+fact_order_key_unique,core,CRITICAL,0,124814,1,Every order must appear once in fact_order,PASS,0.0
+fact_order_item_key_unique,core,CRITICAL,0,180862,1,Every order item must appear once in fact_order_item,PASS,0.0
+fact_inventory_key_unique,core,CRITICAL,0,488146,1,Every inventory item must appear once in fact_inventory,PASS,0.0
+fact_session_key_unique,core,CRITICAL,0,680862,1,Every session_id must produce exactly one fact-session row,PASS,0.0
+session_count_reconciles,core,CRITICAL,0,680862,1,Every distinct nonblank event session must produce one fact session,PASS,0.0
+session_event_count_reconciles,core,CRITICAL,0,2420661,1,Summed fact-session event counts must equal sessionizable events,PASS,0.0
+blank_event_session_ids,staging,WARNING,0,2420661,0,Events without session_id are excluded from session analysis,PASS,0.0
+sessions_with_multiple_user_ids,staging,HIGH,0,680862,1,One session should not be assigned to multiple users,PASS,0.0
+orders_without_customer,core,HIGH,0,124814,1,Every identified order must match a customer dimension row,PASS,0.0
+order_items_without_order,core,CRITICAL,0,180862,1,Every order item must match an order,PASS,0.0
+order_items_without_product,core,CRITICAL,0,180862,1,Every order item must match a product,PASS,0.0
+inventory_without_product,core,HIGH,0,488146,1,Every inventory unit must match a product,PASS,0.0
+inventory_without_distribution_center,core,HIGH,0,488146,1,Every inventory unit must match a distribution center,PASS,0.0
+negative_item_prices_or_costs,core,HIGH,0,180862,1,Negative sale prices and product costs are invalid,PASS,0.0
+cost_above_sale_price,core,WARNING,0,180862,0,Review potentially loss-making items; do not silently remove them,PASS,0.0
+invalid_order_item_timeline,core,HIGH,35440,180862,0,Exclude invalid timelines from lead-time metrics and investigate them,WARN,0.19595050369895278
+events_without_user_id,staging,INFO,1124527,2420661,0,Anonymous events remain valid for traffic analysis but not customer analysis,INFO,0.4645536900871291
+rows_in_incomplete_maximum_month,core,INFO,13,1994,0,Exclude the incomplete maximum month from complete-period comparisons,INFO,0.006519558676028084
