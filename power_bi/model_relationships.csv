@@ -1,0 +1,15 @@
+from_table,from_column,to_table,to_column,cardinality,cross_filter
+dim_date,date_key,fact_order,order_date_key,one-to-many,single
+dim_date,date_key,fact_order_item,order_date_key,one-to-many,single
+dim_date,date_key,fact_session,session_date_key,one-to-many,single
+dim_date,date_key,fact_inventory,inventory_created_date_key,one-to-many,single
+dim_customer,user_id,fact_order,customer_id,one-to-many,single
+dim_customer,user_id,fact_order_item,customer_id,one-to-many,single
+dim_customer,user_id,fact_session,customer_id,one-to-many,single
+dim_product,product_id,fact_order_item,product_id,one-to-many,single
+dim_product,product_id,fact_inventory,product_id,one-to-many,single
+dim_distribution_center,distribution_center_id,fact_order_item,distribution_center_id,one-to-many,single
+dim_distribution_center,distribution_center_id,fact_inventory,distribution_center_id,one-to-many,single
+dim_session_traffic_source,traffic_source,fact_session,traffic_source,one-to-many,single
+dim_acquisition_source,acquisition_source,fact_order,acquisition_source,one-to-many,single
+dim_acquisition_source,acquisition_source,fact_order_item,acquisition_source,one-to-many,single

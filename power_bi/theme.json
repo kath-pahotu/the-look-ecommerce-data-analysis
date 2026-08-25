@@ -1,0 +1,28 @@
+{
+  "name": "TheLook BI Portfolio",
+  "dataColors": ["#2457A7", "#C9952E", "#D8783F", "#7E8D42", "#C46686", "#667085"],
+  "background": "#F7F8FA",
+  "foreground": "#20242C",
+  "tableAccent": "#2457A7",
+  "good": "#7E8D42",
+  "neutral": "#C9952E",
+  "bad": "#D8783F",
+  "maximum": "#2457A7",
+  "center": "#D9DEE7",
+  "minimum": "#EEF2F7",
+  "textClasses": {
+    "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 28, "color": "#20242C"},
+    "title": {"fontFace": "Segoe UI Semibold", "fontSize": 14, "color": "#20242C"},
+    "header": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#20242C"},
+    "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": "#475467"}
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{"color": {"solid": {"color": "#FFFFFF"}}, "transparency": 0}],
+        "border": [{"color": {"solid": {"color": "#E4E7EC"}}, "show": true, "radius": 6}],
+        "title": [{"fontFace": "Segoe UI Semibold", "fontSize": 12, "fontColor": {"solid": {"color": "#20242C"}}}]
+      }
+    }
+  }
+}

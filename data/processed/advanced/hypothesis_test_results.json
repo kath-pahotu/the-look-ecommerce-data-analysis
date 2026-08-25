@@ -1,0 +1,16 @@
+{
+  "return_rate_by_category": {
+    "test": "Chi-square independence test",
+    "chi_square": 28.12599667042668,
+    "p_value": 0.3020856325487077,
+    "cramers_v": 0.021052014548574027,
+    "interpretation": "Statistical significance should be interpreted with Cramer's V; large samples can make negligible differences significant."
+  },
+  "ship_lead_time_by_distribution_center": {
+    "test": "Kruskal-Wallis rank test",
+    "statistic": 8.106025433005625,
+    "p_value": 0.5234977872420689,
+    "groups": 10,
+    "interpretation": "This is an association test, not causal evidence. Invalid source timestamp sequences are excluded."
+  }
+}

@@ -1,0 +1,11 @@
+-- Most modeling columns are created upstream in SQL.
+-- Add only if a source import loses the desired display/sort behavior.
+
+-- In dim_date:
+[Year Month Sort] =
+YEAR ( 'dim_date'[calendar_date] ) * 100
+    + MONTH ( 'dim_date'[calendar_date] )
+
+-- In fact_order_item:
+[Timeline Quality] =
+IF ( 'fact_order_item'[valid_timeline_flag] = 1, "Valid", "Invalid source sequence" )

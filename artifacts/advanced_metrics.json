@@ -1,0 +1,209 @@
+{
+  "rfm_segmentation": {
+    "customers_segmented": 66215,
+    "selected_k": 3,
+    "silhouette_selected_k": 0.3318993668504282,
+    "segments": [
+      {
+        "segment": "Champions",
+        "customers": 19550,
+        "median_recency_days": 190.0,
+        "mean_order_count": 2.714833759590793,
+        "median_net_sales": 180.55999660491943,
+        "total_net_sales": 4388338.183672328
+      },
+      {
+        "segment": "New / Developing",
+        "customers": 12977,
+        "median_recency_days": 32.0,
+        "mean_order_count": 1.392848886491485,
+        "median_net_sales": 61.9900016784668,
+        "total_net_sales": 1161675.8913868852
+      },
+      {
+        "segment": "Hibernating",
+        "customers": 33688,
+        "median_recency_days": 502.0,
+        "mean_order_count": 1.1374970315839468,
+        "median_net_sales": 50.9900016784668,
+        "total_net_sales": 2546517.403458275
+      }
+    ]
+  },
+  "return_propensity": {
+    "eligible_rows": 63463,
+    "train_rows": 24687,
+    "test_rows": 38776,
+    "train_end": "2022-12-31",
+    "test_start": "2023-01-01",
+    "test_return_rate": 0.288322673818857,
+    "roc_auc": 0.5008373241721014,
+    "average_precision": 0.28886766046252493,
+    "brier_score": 0.24936136320723443,
+    "top_decile_return_rate": 0.28674574522949975,
+    "top_decile_lift": 0.9945306813076102,
+    "interpretation": "AUC near 0.50 indicates limited predictive signal in the available pre-outcome features; use this as a methodology demonstration, not a production scoring system."
+  },
+  "market_basket": {
+    "rules_generated": 488,
+    "eligible_orders": 93696,
+    "top_rules": [
+      {
+        "antecedent": "Dresses",
+        "consequent": "Suits",
+        "pair_orders": 54,
+        "support": 0.0005763319672131147,
+        "confidence": 0.013190034196384953,
+        "lift": 1.5967098760523057
+      },
+      {
+        "antecedent": "Suits",
+        "consequent": "Dresses",
+        "pair_orders": 54,
+        "support": 0.0005763319672131147,
+        "confidence": 0.06976744186046512,
+        "lift": 1.5967098760523055
+      },
+      {
+        "antecedent": "Suits",
+        "consequent": "Socks & Hosiery",
+        "pair_orders": 36,
+        "support": 0.00038422131147540983,
+        "confidence": 0.046511627906976744,
+        "lift": 1.544278344568424
+      },
+      {
+        "antecedent": "Socks & Hosiery",
+        "consequent": "Suits",
+        "pair_orders": 36,
+        "support": 0.00038422131147540983,
+        "confidence": 0.012756909992912827,
+        "lift": 1.544278344568424
+      },
+      {
+        "antecedent": "Maternity",
+        "consequent": "Suits",
+        "pair_orders": 47,
+        "support": 0.0005016222677595629,
+        "confidence": 0.012509981368112856,
+        "lift": 1.5143865817399254
+      },
+      {
+        "antecedent": "Suits",
+        "consequent": "Maternity",
+        "pair_orders": 47,
+        "support": 0.0005016222677595629,
+        "confidence": 0.060723514211886306,
+        "lift": 1.5143865817399254
+      },
+      {
+        "antecedent": "Jumpsuits & Rompers",
+        "consequent": "Pants & Capris",
+        "pair_orders": 28,
+        "support": 0.00029883879781420766,
+        "confidence": 0.04046242774566474,
+        "lift": 1.5032385527588437
+      },
+      {
+        "antecedent": "Pants & Capris",
+        "consequent": "Jumpsuits & Rompers",
+        "pair_orders": 28,
+        "support": 0.00029883879781420766,
+        "confidence": 0.011102299762093577,
+        "lift": 1.5032385527588434
+      },
+      {
+        "antecedent": "Leggings",
+        "consequent": "Plus",
+        "pair_orders": 113,
+        "support": 0.001206028005464481,
+        "confidence": 0.049366535605067714,
+        "lift": 1.4591315205212696
+      },
+      {
+        "antecedent": "Plus",
+        "consequent": "Leggings",
+        "pair_orders": 113,
+        "support": 0.001206028005464481,
+        "confidence": 0.03564668769716088,
+        "lift": 1.4591315205212694
+      }
+    ]
+  },
+  "experiment_power": {
+    "baseline_cart_to_purchase_rate": 0.4200095677335154,
+    "plans": [
+      {
+        "baseline_cart_to_purchase_rate": 0.4200095677335154,
+        "absolute_mde": 0.01,
+        "relative_mde": 0.02380898143335803,
+        "alpha": 0.05,
+        "power": 0.8,
+        "sample_per_variant": 38361,
+        "total_sample": 76722
+      },
+      {
+        "baseline_cart_to_purchase_rate": 0.4200095677335154,
+        "absolute_mde": 0.02,
+        "relative_mde": 0.04761796286671606,
+        "alpha": 0.05,
+        "power": 0.8,
+        "sample_per_variant": 9618,
+        "total_sample": 19236
+      },
+      {
+        "baseline_cart_to_purchase_rate": 0.4200095677335154,
+        "absolute_mde": 0.03,
+        "relative_mde": 0.07142694430007408,
+        "alpha": 0.05,
+        "power": 0.8,
+        "sample_per_variant": 4286,
+        "total_sample": 8572
+      },
+      {
+        "baseline_cart_to_purchase_rate": 0.4200095677335154,
+        "absolute_mde": 0.01,
+        "relative_mde": 0.02380898143335803,
+        "alpha": 0.05,
+        "power": 0.9,
+        "sample_per_variant": 51354,
+        "total_sample": 102708
+      },
+      {
+        "baseline_cart_to_purchase_rate": 0.4200095677335154,
+        "absolute_mde": 0.02,
+        "relative_mde": 0.04761796286671606,
+        "alpha": 0.05,
+        "power": 0.9,
+        "sample_per_variant": 12875,
+        "total_sample": 25750
+      },
+      {
+        "baseline_cart_to_purchase_rate": 0.4200095677335154,
+        "absolute_mde": 0.03,
+        "relative_mde": 0.07142694430007408,
+        "alpha": 0.05,
+        "power": 0.9,
+        "sample_per_variant": 5737,
+        "total_sample": 11474
+      }
+    ],
+    "note": "The dataset has no randomized assignment or exposure table, so no historical A/B effect is estimated. This is a forward-looking power plan."
+  },
+  "hypothesis_tests": {
+    "return_rate_by_category": {
+      "test": "Chi-square independence test",
+      "chi_square": 28.12599667042668,
+      "p_value": 0.3020856325487077,
+      "cramers_v": 0.021052014548574027,
+      "interpretation": "Statistical significance should be interpreted with Cramer's V; large samples can make negligible differences significant."
+    },
+    "ship_lead_time_by_distribution_center": {
+      "test": "Kruskal-Wallis rank test",
+      "statistic": 8.106025433005625,
+      "p_value": 0.5234977872420689,
+      "groups": 10,
+      "interpretation": "This is an association test, not causal evidence. Invalid source timestamp sequences are excluded."
+    }
+  }
+}

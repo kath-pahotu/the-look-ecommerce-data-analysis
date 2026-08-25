@@ -1,0 +1,8 @@
+{
+  "source_csv_dir": "../original_analysis/5_the_look_ecommerce/csv_version/3_thelookecommerce",
+  "duckdb_path": "artifacts/thelook_analytics.duckdb",
+  "sql_server": "localhost\\SQLEXPRESS",
+  "sql_server_database": "thelook_bi_rebuild",
+  "power_bi_export_format": ["csv", "parquet"],
+  "complete_period_rule": "Exclude the maximum source month from period comparisons when it is incomplete."
+}

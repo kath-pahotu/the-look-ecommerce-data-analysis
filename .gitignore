@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------------------
+# The Look eCommerce — repository hygiene
+#
+# Philosophy: commit CODE, DOCS, small RESULT/EVIDENCE files, and rendered
+# FIGURES. Do NOT commit the heavy regenerable warehouse, the bulk mart
+# exports, or the large Power BI binary. Anyone can rebuild everything with:
+#     python src/run_all.py --source-csv-dir <path-to-7-csvs> --rebuild
+# ---------------------------------------------------------------------------
+
+# Private analyst review pack (internal QA; never published)
+private_review/
+
+# Heavy, fully regenerable data
+data/raw/
+data/processed/analysis/
+data/processed/power_bi/
+
+# Warehouse binaries (rebuilt by the pipeline)
+*.duckdb
+*.duckdb.wal
+
+# Power BI desktop file — 90MB+ with embedded model; share via the live
+# Publish-to-web link + screenshots instead. Kept locally, never pushed.
+*.pbix
+*.pbit
+
+# Runtime notebook exports and logs
+outputs/
+logs/
+
+# Local environment and secrets
+.env
+config.local.json
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------------
+# Explicitly COMMITTED (kept in the repo as portfolio deliverables):
+#   data/processed/advanced/     model outputs (RFM, return, basket, A/B)
+#   artifacts/figures/*.png       rendered analysis figures
+#   artifacts/*.json              pipeline + validation evidence
+#   docs/screenshots/*.png        dashboard screenshots
+#   notebooks/*.ipynb             executed analysis notebooks
+# ---------------------------------------------------------------------------

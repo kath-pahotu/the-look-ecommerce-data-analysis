@@ -1,0 +1,246 @@
+-- COMMERCIAL
+[Gross Sales] =
+SUM ( 'fact_order_item'[gross_sales_value] )
+
+[Cancelled Value] =
+SUM ( 'fact_order_item'[cancelled_value] )
+
+[Returned Value] =
+SUM ( 'fact_order_item'[returned_value] )
+
+[Net Sales] =
+SUM ( 'fact_order_item'[net_sales_value] )
+
+[Net Profit] =
+SUM ( 'fact_order_item'[net_profit_value] )
+
+[Net Margin %] =
+DIVIDE ( [Net Profit], [Net Sales] )
+
+[Sales Leakage Value] =
+[Cancelled Value] + [Returned Value]
+
+[Sales Leakage %] =
+DIVIDE ( [Sales Leakage Value], [Gross Sales] )
+
+[Orders] =
+DISTINCTCOUNT ( 'fact_order_item'[order_id] )
+
+[Customers] =
+DISTINCTCOUNT ( 'fact_order_item'[customer_id] )
+
+[Items] =
+COUNTROWS ( 'fact_order_item' )
+
+[Average Order Value] =
+DIVIDE ( [Net Sales], [Orders] )
+
+[Items per Order] =
+DIVIDE ( [Items], [Orders] )
+
+[Net Sales per Customer] =
+DIVIDE ( [Net Sales], [Customers] )
+
+-- GROWTH / COMPLETE PERIODS
+[Net Sales Complete Periods] =
+CALCULATE (
+    [Net Sales],
+    KEEPFILTERS ( 'dim_date'[is_complete_month] = 1 )
+)
+
+[Net Sales Previous Month] =
+CALCULATE ( [Net Sales], DATEADD ( 'dim_date'[calendar_date], -1, MONTH ) )
+
+[Net Sales MoM Change] =
+[Net Sales] - [Net Sales Previous Month]
+
+[Net Sales MoM %] =
+DIVIDE ( [Net Sales MoM Change], [Net Sales Previous Month] )
+
+[Net Sales Previous Year] =
+CALCULATE ( [Net Sales], SAMEPERIODLASTYEAR ( 'dim_date'[calendar_date] ) )
+
+[Net Sales YoY Change] =
+[Net Sales] - [Net Sales Previous Year]
+
+[Net Sales YoY %] =
+DIVIDE ( [Net Sales YoY Change], [Net Sales Previous Year] )
+
+[Net Sales YTD] =
+TOTALYTD ( [Net Sales], 'dim_date'[calendar_date] )
+
+[Net Sales PYTD] =
+CALCULATE ( [Net Sales YTD], SAMEPERIODLASTYEAR ( 'dim_date'[calendar_date] ) )
+
+[Net Sales Rolling 12M] =
+CALCULATE (
+    [Net Sales],
+    DATESINPERIOD (
+        'dim_date'[calendar_date],
+        MAX ( 'dim_date'[calendar_date] ),
+        -12,
+        MONTH
+    )
+)
+
+[Orders Previous Year] =
+CALCULATE ( [Orders], SAMEPERIODLASTYEAR ( 'dim_date'[calendar_date] ) )
+
+[Orders YoY %] =
+DIVIDE ( [Orders] - [Orders Previous Year], [Orders Previous Year] )
+
+-- FUNNEL
+[Sessions] =
+COUNTROWS ( 'fact_session' )
+
+[Identified Sessions] =
+CALCULATE ( [Sessions], 'fact_session'[identified_session_flag] = 1 )
+
+[Identified Session Rate] =
+DIVIDE ( [Identified Sessions], [Sessions] )
+
+[Product View Sessions] =
+CALCULATE ( [Sessions], 'fact_session'[product_view_flag] = 1 )
+
+[Cart Sessions] =
+CALCULATE ( [Sessions], 'fact_session'[cart_flag] = 1 )
+
+[Purchase Sessions] =
+CALCULATE ( [Sessions], 'fact_session'[purchase_flag] = 1 )
+
+[Abandoned Cart Sessions] =
+CALCULATE ( [Sessions], 'fact_session'[cart_abandoned_flag] = 1 )
+
+[Session Conversion Rate] =
+DIVIDE ( [Purchase Sessions], [Sessions] )
+
+[Product to Cart Rate] =
+DIVIDE ( [Cart Sessions], [Product View Sessions] )
+
+[Cart to Purchase Rate] =
+DIVIDE ( [Purchase Sessions], [Cart Sessions] )
+
+[Cart Abandonment Rate] =
+DIVIDE ( [Abandoned Cart Sessions], [Cart Sessions] )
+
+[Average Events per Session] =
+AVERAGE ( 'fact_session'[event_count] )
+
+[Average Session Minutes] =
+DIVIDE ( AVERAGE ( 'fact_session'[session_duration_seconds] ), 60 )
+
+[Average Event Identity Coverage] =
+AVERAGE ( 'fact_session'[event_identity_coverage_rate] )
+
+-- CUSTOMER
+[Purchasing Customers] =
+DISTINCTCOUNT ( 'customer_360'[customer_id] )
+
+[Repeat Customers] =
+CALCULATE (
+    DISTINCTCOUNT ( 'customer_360'[customer_id] ),
+    'customer_360'[repeat_customer_flag] = 1
+)
+
+[Repeat Customer Rate] =
+DIVIDE ( [Repeat Customers], [Purchasing Customers] )
+
+-- RETURNS / CANCELLATIONS
+[Returned Items] =
+SUM ( 'fact_order_item'[returned_item_flag] )
+
+[Return Eligible Items] =
+SUM ( 'fact_order_item'[return_observation_eligible_flag] )
+
+[Observed Return Rate] =
+DIVIDE ( [Returned Items], [Return Eligible Items] )
+
+[Cancelled Items] =
+SUM ( 'fact_order_item'[cancelled_item_flag] )
+
+[Item Cancellation Rate] =
+DIVIDE ( [Cancelled Items], [Items] )
+
+-- OPERATIONS
+[Valid Timeline Items] =
+CALCULATE ( [Items], 'fact_order_item'[valid_timeline_flag] = 1 )
+
+[Valid Timeline Rate] =
+DIVIDE ( [Valid Timeline Items], [Items] )
+
+[Average Ship Lead Days] =
+AVERAGE ( 'fact_order_item'[ship_lead_days] )
+
+[Median Ship Lead Days] =
+MEDIAN ( 'fact_order_item'[ship_lead_days] )
+
+[Median Delivery Lead Days] =
+MEDIAN ( 'fact_order_item'[delivery_lead_days] )
+
+[Median End-to-End Lead Days] =
+MEDIAN ( 'fact_order_item'[end_to_end_lead_days] )
+
+[P90 End-to-End Lead Days] =
+PERCENTILEX.INC (
+    FILTER (
+        'fact_order_item',
+        NOT ISBLANK ( 'fact_order_item'[end_to_end_lead_days] )
+            && 'fact_order_item'[valid_timeline_flag] = 1
+    ),
+    'fact_order_item'[end_to_end_lead_days],
+    0.9
+)
+
+[Delivered Within 7 Days] =
+CALCULATE (
+    [Items],
+    'fact_order_item'[valid_timeline_flag] = 1,
+    'fact_order_item'[end_to_end_lead_days] <= 7
+)
+
+[Delivered Within 7 Days Rate] =
+DIVIDE ( [Delivered Within 7 Days], [Valid Timeline Items] )
+
+-- INVENTORY
+[Inventory Units] =
+COUNTROWS ( 'fact_inventory' )
+
+[Sold Inventory Units] =
+SUM ( 'fact_inventory'[sold_flag] )
+
+[Unsold Inventory Units] =
+[Inventory Units] - [Sold Inventory Units]
+
+[Sell-through Rate] =
+DIVIDE ( [Sold Inventory Units], [Inventory Units] )
+
+[Unsold Inventory Cost] =
+SUMX (
+    FILTER ( 'fact_inventory', 'fact_inventory'[sold_flag] = 0 ),
+    'fact_inventory'[unit_cost]
+)
+
+[Aged 181+ Inventory Units] =
+CALCULATE (
+    [Inventory Units],
+    'fact_inventory'[inventory_age_bucket] = "181+ days"
+)
+
+[Median Days to Sell] =
+MEDIAN ( 'fact_inventory'[days_to_sell] )
+
+-- DATA QUALITY / TITLES
+[Latest Data Date] =
+MAX ( 'dim_date'[calendar_date] )
+
+[Partial Period Label] =
+IF (
+    MAX ( 'dim_date'[is_complete_month] ) = 0,
+    "Partial period included",
+    "Complete periods"
+)
+
+[Selected Date Range] =
+FORMAT ( MIN ( 'dim_date'[calendar_date] ), "dd MMM yyyy" )
+    & " - "
+    & FORMAT ( MAX ( 'dim_date'[calendar_date] ), "dd MMM yyyy" )
