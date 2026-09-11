@@ -260,6 +260,13 @@ def render_documents(project_root: Path, connection: duckdb.DuckDBPyConnection) 
         FROM mart.inventory_performance
         """
     ).fetchone()
+    top_country = connection.execute(
+        """
+        SELECT country, net_sales_value
+        FROM mart.geography_performance_country
+        ORDER BY net_sales_value DESC LIMIT 1
+        """
+    ).fetchone()
     invalid_shipping = connection.execute(
         """
         SELECT failure_count, failure_rate
@@ -276,29 +283,39 @@ def render_documents(project_root: Path, connection: duckdb.DuckDBPyConnection) 
 
     gross_sales, cancelled_value, returned_value, net_sales, net_profit, orders, customers = totals
     session_count, cart_sessions, purchases, abandoned = sessions
-    annual_lines = "\n".join(
-        f"- {year}: {money(value)} net sales (complete months only)"
+    annual_rows = "\n".join(
+        f"| {year} | {money(value)} |"
         for year, value in annual
     )
-    category_lines = "\n".join(
-        f"- {name}: {money(sales)} net sales, {money(profit)} profit, "
-        f"{pct(margin)} margin, {pct(return_rate)} observed return rate"
+    category_rows = "\n".join(
+        f"| {name} | {money(sales)} | {money(profit)} | {pct(margin)} | {pct(return_rate)} |"
         for name, sales, profit, margin, return_rate in top_categories
     )
-    channel_lines = "\n".join(
-        f"- {name}: {sessions_value:,} sessions, {pct(conversion)} conversion, "
-        f"{pct(abandonment)} cart abandonment"
+    channel_rows = "\n".join(
+        f"| {name} | {sessions_value:,} | {pct(conversion)} | {pct(abandonment)} |"
         for name, sessions_value, conversion, abandonment in channels
     )
-    acquisition_lines = "\n".join(
-        f"- {name}: {customers_value:,} customers, {orders_value:,} orders, "
-        f"{money(sales)} net sales, {money(sales_per_customer)} per customer"
+    acquisition_rows = "\n".join(
+        f"| {name} | {customers_value:,} | {orders_value:,} | {money(sales)} | {money(sales_per_customer)} |"
         for name, customers_value, orders_value, sales, sales_per_customer
         in acquisition_sources
     )
     model = advanced["return_propensity"]
+    rfm = advanced["rfm_segmentation"]
+    basket = advanced["market_basket"]
+    segment_rows = "\n".join(
+        f"| {segment['segment']} | {segment['customers']:,} | "
+        f"{segment['median_recency_days']:.0f} days | {money(segment['total_net_sales'])} |"
+        for segment in rfm["segments"]
+    )
+    champions = next(s for s in rfm["segments"] if s["segment"] == "Champions")
+    hibernating = next(s for s in rfm["segments"] if s["segment"] == "Hibernating")
+    champion_customer_share = champions["customers"] / rfm["customers_segmented"]
+    champion_sales_share = champions["total_net_sales"] / (
+        champions["total_net_sales"] + hibernating["total_net_sales"]
+    )
 
-    findings = f"""# TheLook eCommerce - validated analysis findings
+    findings = f"""# Analysis & Findings
 
 ## Decision summary
 
@@ -315,41 +332,103 @@ The dataset supports a connected BI story across acquisition, funnel behavior, c
 - Cart sessions: {cart_sessions:,}; abandoned cart sessions: {abandoned:,}; cart abandonment: {pct(abandoned / cart_sessions)}.
 - Repeat-customer rate: {pct(repeat_rate)}.
 
-## Growth and period handling
+## Business questions & findings
 
-{annual_lines}
+### 1. Acquisition, onsite behavior, and funnel
 
-Do not compare the partial 2024 period against full prior years. The dashboard marks incomplete months and period measures use the complete-period flag.
+**Questions addressed:** Which traffic sources drive session volume, purchase conversion, and acquisition-attributed value? Where do sessions exit between product view, cart, and purchase? Which channels show high cart abandonment? Is channel concentration creating growth risk?
 
-## Acquisition and funnel
-
-{channel_lines}
+| Channel | Sessions | Conversion | Cart Abandonment |
+|---|---|---|---|
+{channel_rows}
 
 Traffic volume is concentrated in Email and Adwords. Every session field is rebuilt inside SQL by grouping `events.csv` on `session_id`; no source session file is used. `events.user_id` is missing on many individual events, but a session can still be linked when one of its events identifies the user.
 
 Customer acquisition-source value is analyzed separately because its taxonomy (Search, Display, Organic, Facebook, Email) does not align one-to-one with session channels:
 
-{acquisition_lines}
+| Acquisition Source | Customers | Orders | Net Sales | Per Customer |
+|---|---|---|---|---|
+{acquisition_rows}
 
-## Product and commercial performance
+By country, {top_country[0]} is the single largest net-sales market ({money(top_country[1])}), ahead of every other country individually — see `mart.geography_performance_country` for the full breakdown.
 
-{category_lines}
+### 2. Revenue and growth
+
+**Questions addressed:** How do gross sales, net sales, profit, customers, orders, and AOV move over time? Is growth driven by volume or basket value? Which trends are valid after excluding the incomplete latest month?
+
+| Year | Net Sales (complete months) |
+|---|---|
+{annual_rows}
+
+Do not compare the partial 2024 period against full prior years. The dashboard marks incomplete months and period measures use the complete-period flag.
+
+### 3. Product and commercial performance
+
+**Questions addressed:** Which categories lead sales, profit, units, and margin? Which high-volume products underperform on revenue or profit? Which product groups show elevated observed return rate?
+
+| Category | Net Sales | Profit | Margin | Return Rate |
+|---|---|---|---|---|
+{category_rows}
 
 High volume, high revenue, and high margin are not interchangeable. The Product page therefore uses a sales-versus-margin quadrant with item volume and return rate as context.
 
-## Operations and inventory
+### 4. Customers and lifecycle
+
+**Questions addressed:** How large is the repeat-customer base? Which acquisition cohorts retain purchase activity? Which RFM segments should receive retention, reactivation, or VIP treatment?
+
+Champions make up only {pct(champion_customer_share)} of segmented customers ({champions['customers']:,} of {rfm['customers_segmented']:,}) but generate {pct(champion_sales_share)} of the combined Champions+Hibernating net sales ({money(champions['total_net_sales'])} vs. {money(hibernating['total_net_sales'])} from {hibernating['customers']:,} Hibernating customers) — a small, high-value segment outweighing a much larger dormant one. Full segment profiles are in Advanced methods below.
+
+### 5. Operations, delivery, returns, and inventory
+
+**Questions addressed:** How long are order-to-ship, ship-to-delivery, and end-to-end stages? Which distribution centers have high median or tail (P90) lead time? Which inventory groups have low sell-through or aged unsold value?
 
 - Inventory units: {int(inventory[0]):,}; sold units: {int(inventory[1]):,}; sell-through: {pct(inventory[1] / inventory[0])}.
 - Unsold inventory cost: {money(inventory[2])}; aged 181+ day units: {int(inventory[3]):,}.
 - {int(invalid_shipping[0]):,} order-item rows ({pct(invalid_shipping[1])}) have `shipped_at < created_at`. Delivery metrics exclude those rows and display valid-record coverage.
 
-## Advanced analytics
+## Advanced methods
 
-1. **RFM clustering** segments {advanced['rfm_segmentation']['customers_segmented']:,} customers into three action-oriented groups. It is suitable for lifecycle targeting and dashboard drill-through.
-2. **Return propensity modeling** uses a time-based holdout and pre-outcome features only. Test ROC AUC is {model['roc_auc']:.3f} and top-decile lift is {model['top_decile_lift']:.2f}x. This weak signal is an honest dataset finding; the model is a portfolio demonstration, not a production score.
-3. **Market-basket association rules** produce {advanced['market_basket']['rules_generated']:,} directional category rules for cross-sell design. Use lift with support and pair count; do not rank on lift alone.
+### 1. Gini coefficient & Lorenz curve
 
-The data has no randomized assignment table, so a historical A/B effect cannot be estimated. A forward-looking power plan is included instead.
+**Why it fits:** revenue concentration is a direct question about equity of spending across the customer base.
+
+**Method:** compute the Gini coefficient on net customer spend, validate the formula against known extreme/mild-inequality examples, then plot the Lorenz curve (see `notebooks/02_statistical_deep_dives.ipynb`).
+
+**Value:** quantifies whether retention economics on a high-value tail beat blanket acquisition spend. It is a single summary statistic; it does not identify *which* customers to act on — RFM segmentation below does that.
+
+### 2. RFM customer clustering
+
+**Why it fits:** order history supports recency, frequency, monetary value, profit, and return behavior at customer grain.
+
+**Method:** log-transform R/F/M, robust scale, compare K=2..8 using silhouette and inertia, and select {rfm['selected_k']} action-oriented clusters (silhouette {rfm['silhouette_selected_k']:.2f}).
+
+**Result:** {rfm['customers_segmented']:,} customers segmented into {rfm['selected_k']} groups.
+
+| Segment | Customers | Median Recency | Total Net Sales |
+|---|---|---|---|
+{segment_rows}
+
+**Value:** CRM targeting, lifecycle campaigns, VIP service, reactivation, and segment drill-through in Power BI. Clusters describe observed behavior; they do not prove a treatment will work.
+
+### 3. Return-propensity classification
+
+**Why it fits:** Complete versus Returned item outcomes can be modeled from pre-outcome product, customer, price, order, time, and fulfillment-location features.
+
+**Method:** eligibility restriction to Complete/Returned items, time-based train/test split, one-hot encoding, class-balanced logistic regression, ROC AUC, average precision, Brier score, coefficient review, decile lift, and leakage audit.
+
+**Result:** test ROC AUC is {model['roc_auc']:.3f} and top-decile lift is {model['top_decile_lift']:.2f}x. This weak signal is an honest dataset finding — the model is a portfolio demonstration, not a production score.
+
+**Decision rule:** do not deploy if out-of-time lift is weak. The honest result on synthetic data is itself an analytical conclusion.
+
+### 4. Market-basket association rules
+
+**Why it fits:** co-purchased categories inform cross-sell and merchandising design.
+
+**Method:** category-level association mining over eligible multi-item orders, ranked by lift with support and pair count retained as guards.
+
+**Result:** {basket['rules_generated']:,} directional category rules from {basket['eligible_orders']:,} eligible orders. Use lift with support and pair count; do not rank on lift alone.
+
+The data has no randomized assignment table, so a historical A/B effect cannot be estimated. A forward-looking power plan is included instead (see `docs/technical_reference.md`).
 
 ## Material limitations
 
@@ -358,7 +437,7 @@ The data has no randomized assignment table, so a historical A/B effect cannot b
 - Product-level cart abandonment cannot be attributed reliably because cart/purchase events do not contain cart contents or order IDs.
 - External delivery benchmarks were not added; set SLA targets based on the portfolio scenario or verified market sources.
 """
-    (docs_dir / "analysis_findings.md").write_text(findings, encoding="utf-8")
+    (docs_dir / "analysis_and_findings.md").write_text(findings, encoding="utf-8")
 
     dq_rows = connection.execute(
         """
@@ -452,7 +531,7 @@ Automated test summary: {dict(qa_summary)}. Blocking failures must be zero befor
 | Sessions with multiple browsers | {int(multi_browsers):,} |
 | Sessions with multiple traffic sources | {int(multi_sources):,} |
 
-The event and session reconciliations have zero variance. See `notebooks/03_event_sessionization_audit.ipynb` for the executable review and `docs/02_SESSIONIZATION_FROM_EVENTS.md` for field-level derivation rules.
+The event and session reconciliations have zero variance. See `notebooks/03_event_sessionization_audit.ipynb` for the executable review and `docs/technical_reference.md` for field-level derivation rules.
 """
     (private_dir / "session_lineage_audit.md").write_text(
         session_doc, encoding="utf-8"

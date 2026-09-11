@@ -1,5 +1,7 @@
 # Dashboard blueprint
 
+This is the 7-page report as built. Page names and groupings match the screenshots in the root `README.md`.
+
 ## Global conventions
 
 - Audience: BI/analytics portfolio reviewers and e-commerce leaders.
@@ -15,7 +17,7 @@
 
 - Cards: Net Sales, Net Profit, Orders, Customers, Session Conversion, Observed Return Rate.
 - Line: monthly Net Sales and Net Profit, with partial-period shading.
-- Waterfall: Gross Sales -> Cancelled Value -> Returned Value -> Net Sales.
+- Waterfall (sales leakage): Gross Sales -> Cancelled Value -> Returned Value -> Net Sales.
 - Ranked bar: top categories by Net Sales.
 - Compact matrix: Traffic Source with Sessions, Conversion, Net Sales/Session.
 - Callout: partial period and valid delivery-record coverage.
@@ -31,17 +33,28 @@
 - Bar: cart abandonment by Browser and Country, minimum-volume filtered.
 - Tooltip: sessions, users, events/session, identity coverage, cart/purchase counts.
 
-## Page 3 - Revenue & Growth
+## Page 3 - Revenue & Product Mix
 
-**Question:** What drives sales and profit movement?
+**Question:** What drives sales movement, and which products balance demand, sales, and margin?
 
-- Cards: Gross Sales, Net Sales, Leakage %, AOV, Items/Order, Net Margin %.
-- Line: Net Sales with prior year.
+- Cards: Gross Sales, Net Sales, Leakage %, AOV, Items/Order, Average Selling Price.
+- Line: Net Sales with prior year (units-sold trend as secondary series).
+- Scatter (value-margin matrix): category Net Sales vs Net Margin %, size by items.
+- Ranked bars: top brands by Net Sales; categories by item volume.
 - Decomposition tree: Net Sales by Country -> Department -> Category -> Brand -> Source.
-- Waterfall: YoY absolute change by category (build from complete-period measures).
 - Matrix: year/month performance with MoM and YoY.
 
-## Page 4 - Customers & Cohorts
+## Page 4 - Profitability & Returns
+
+**Question:** How much profit survives leakage, and where do returns concentrate?
+
+- Cards: Net Profit, Net Margin %, Observed Return Rate, Cancelled Value, Returned Value.
+- Waterfall (gross-to-net profit bridge): Gross Sales -> Cancelled -> Returned -> Net Sales -> Product Cost -> Net Profit.
+- Bar with reference: observed return rate by category (top return drivers), minimum eligible items.
+- Return-risk model outputs: ROC AUC, average precision, Brier score, decile lift.
+- Methodology callout: synthetic data, observational results, weak model reported honestly and not deployed.
+
+## Page 5 - Customer & Cohort
 
 **Question:** Which customers are valuable, repeat, retained, or at risk?
 
@@ -51,16 +64,7 @@
 - Scatter: segment recency versus median Net Sales, size by customers.
 - Drill-through customer table uses numeric ID only; no PII.
 
-## Page 5 - Product & Merchandising
-
-**Question:** Which products balance demand, sales, margin, and returns?
-
-- Scatter: category Net Sales vs Net Margin %, size by items.
-- Ranked bars: top brands by Net Sales; categories by item volume.
-- Bar with reference: observed return rate by category (minimum eligible items).
-- Drill-through: product/brand performance and inventory context.
-
-## Page 6 - Operations & Delivery
+## Page 6 - Operations
 
 **Question:** Where are fulfillment delays and tail risks?
 
@@ -68,25 +72,17 @@
 - Stage bar: order-created -> shipped -> delivered -> returned median days.
 - Grouped horizontal bars: median and P90 by Distribution Center.
 - Trend: monthly median and P90 E2E.
+- SLA breach simulator: what-if parameter on a lead-time threshold, showing the share of orders that would breach.
 - Detail table: DC, items, valid coverage, return rate.
 
-## Page 7 - Inventory & Returns
+## Page 7 - Inventory
 
-**Question:** Where is capital tied up and where do returns concentrate?
+**Question:** Where is capital tied up in unsold stock?
 
 - Cards: Inventory Units, Sell-through %, Unsold Cost, 181+ Day Units.
 - Stacked bar: inventory age buckets by category.
-- Scatter: sell-through vs median days to sell, size by unsold cost.
-- Bar: observed return rate by category/country/age/source.
+- Scatter (stock efficiency matrix): sell-through vs median days to sell, size by unsold cost.
 - Table: highest unsold retail value by category and DC.
-
-## Page 8 - Advanced Analytics
-
-**Question:** What do clustering and predictive modeling add?
-
-- RFM segment profiles and customer counts.
-- Return-model ROC AUC, average precision, Brier, and decile lift.
-- Methodology callouts: synthetic data, observational results, no production deployment.
 
 ## Tooltip pages
 

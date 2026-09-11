@@ -67,10 +67,8 @@ class ProjectContractTests(unittest.TestCase):
         self.assertIn("group by session_id", staging_sql)
 
     def test_navigation_entrypoint_exists(self):
-        start = PROJECT_ROOT / "00_START_HERE.md"
-        walkthrough = PROJECT_ROOT / "docs" / "01_PROJECT_WALKTHROUGH.md"
-        self.assertTrue(start.exists())
-        self.assertTrue(walkthrough.exists())
+        readme = PROJECT_ROOT / "README.md"
+        self.assertTrue(readme.exists())
 
 
 if __name__ == "__main__":

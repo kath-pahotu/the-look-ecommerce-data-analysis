@@ -20,16 +20,13 @@ ORIGINAL_SOURCE_TABLES = {
 }
 
 REQUIRED_FILES = [
-    "00_START_HERE.md",
     "README.md",
     ".gitignore",
     "requirements.txt",
-    "docs/01_PROJECT_WALKTHROUGH.md",
-    "docs/02_SESSIONIZATION_FROM_EVENTS.md",
-    "docs/analysis_findings.md",
+    "docs/analysis_and_findings.md",
+    "docs/technical_reference.md",
     "docs/kpi_dictionary.md",
     "docs/data_dictionary.md",
-    "docs/advanced_methods.md",
     "private_review/session_lineage_audit.md",
     "power_bi/README.md",
     "power_bi/data_model.md",

@@ -5,8 +5,6 @@
 <!-- TODO(you): paste your live dashboard link here once published, e.g. Publish-to-web URL -->
 🔗 **Live dashboard:** [View the interactive Power BI report](https://app.powerbi.com/view?r=eyJrIjoiNmZiNzVmYzQtZTE4OC00ZTM0LThmZDYtNThmMzQ5MjljNGMxIiwidCI6IjNkZmNkMTY2LWYzZmUtNGQxNS1hNDYzLTA0NTU2YzMwNWZmMiIsImMiOjEwfQ%3D%3D)
 
-> **Feeling lost?** Open [`00_START_HERE.md`](00_START_HERE.md) for the guided review order.
-
 ---
 
 ## 1. Executive Summary
@@ -93,9 +91,7 @@ Days-to-Sell.
 
 ---
 
-## 3. Tech Stack & Architecture
-
-### Tools used
+## 3. Tech Stack
 
 | Layer | Tool | Role |
 |---|---|---|
@@ -104,147 +100,145 @@ Days-to-Sell.
 | **Analytics & ML** | **Python** (`scikit-learn`, `numpy`, `matplotlib`, `seaborn`) | Gini/Lorenz concentration analysis, RFM K-means segmentation, logistic-regression return model |
 | **Reporting** | **Power BI** (star schema, DAX, drill-through, field parameters, what-if) | 7-page executive-to-operations dashboard |
 
-### Pipeline Architecture — a Local ETL/ELT pipeline
+This is a **local ELT pipeline** — run entirely on one machine, loading raw first and then
+transforming *inside* the warehouse with SQL (`raw → stg → core → mart → qa`), the pattern most
+analytics-engineering roles use today. Everything is triggered by **one command**
+(`python src/run_all.py --rebuild`) and gated by `src/validate_project.py`, which fails the build
+unless 20+ contracts hold.
 
-Yes — this project is a **local ETL pipeline**, run entirely on one machine with no cloud
-dependency. More precisely it follows the modern **ELT** shape (load raw first, then transform
-*inside* the warehouse with SQL), which is the pattern most analytics-engineering roles use today:
-
-```mermaid
-flowchart LR
-    subgraph E["EXTRACT"]
-      A["7 original CSVs<br/>users · products · orders · order_items<br/>events · inventory_events · distribution_centers"]
-    end
-    subgraph L1["LOAD (raw)"]
-      B["raw schema<br/>source-preserving tables"]
-    end
-    subgraph T["TRANSFORM (in-warehouse SQL)"]
-      C["stg: typed views<br/>+ sessions rebuilt from events"]
-      D["core: conformed star schema<br/>dims + facts at declared grain"]
-      Mt["mart: funnel · commercial · customer<br/>operations · inventory decision tables"]
-      Q["qa: row rules · lineage · reconciliation"]
-    end
-    subgraph L2["LOAD (serve)"]
-      F["Power BI CSV / Parquet exports"]
-      G["Advanced Python model outputs + figures"]
-    end
-    A --> B --> C --> D --> Mt --> F
-    C --> D
-    Mt --> G
-    D --> Q
-```
-
-**How the E-T-L maps to this repo:**
-
-- **Extract** — `src/pipeline.py` reads *only* the seven declared CSVs (any legacy/derived file
-  beside them is ignored) and profiles them.
-- **Load (raw)** — each source lands in a source-preserving `raw` table.
-- **Transform** — seven numbered SQL modules (`sql/duckdb/01_staging.sql` … `07_quality_and_snapshots.sql`)
-  do all the real work in-warehouse: casting & normalization (`stg`), **session reconstruction
-  from `events.csv`** (`stg.sessions`), the conformed star schema (`core`), decision-oriented
-  aggregates (`mart`), and a battery of data-quality tests (`qa`).
-- **Load (serve)** — marts are exported to CSV **and** Parquet for Power BI, and the advanced
-  Python layer writes model tables + figures.
-
-Everything above is triggered by **one command** (`python src/run_all.py --rebuild`) and gated
-by `src/validate_project.py`, which fails the build unless 20+ contracts hold.
-
-### Layer responsibilities & declared grains
-
-| Layer | Purpose | Grain examples |
-|---|---|---|
-| `raw` | Load only the seven originals | 1 row per source row |
-| `stg` | Types, normalization, privacy boundary, **event-derived sessions** | views |
-| `core` | Star-schema dims & facts | `fact_order_item` = 1 row/item; `fact_session` = 1 row/`session_id` |
-| `mart` | Decision aggregates | `customer_360` = 1 row/customer; `cohort_retention` = 1 row/cohort-month × month |
-| `qa` | Tests, lineage, reconciliation | 1 row per check |
-
-**Source-of-truth rule:** a session table is *not* a source input. `stg.sessions` is derived
-inside SQL from `events.csv` grouped by `session_id`, and reconciles exactly —
-**2,420,661 events → 680,862 sessions with zero variance** (see
-[`notebooks/03_event_sessionization_audit.ipynb`](notebooks/03_event_sessionization_audit.ipynb)).
+> **Full architecture** — the layer diagram, layer responsibilities, declared grains, source
+> contract, and event-to-session derivation are documented in
+> [`docs/technical_reference.md`](docs/technical_reference.md).
 
 ---
 
-## 4. End-to-End Workflow Stages
+## 4. Key Insights & Recommendations
 
-### Stage 1 — Extract & profile (Python)
-`src/pipeline.py` loads the seven CSVs and records a source-inventory fingerprint. The original
-dataset is exactly these seven files — there is no separate session file; sessions are
-reconstructed inside SQL from `events.csv` in Stage 2.
+> Insights below combine the warehouse-computed metrics with a page-by-page read of the built
+> Power BI dashboard. The dataset is **synthetic**, so patterns reflect its generator, not a real
+> market — the transferable value is the *method*. Full metric tables are in
+> [`docs/analysis_and_findings.md`](docs/analysis_and_findings.md).
 
-### Stage 2 — Model in SQL (`raw → stg → core → mart → qa`)
-Seven numbered DuckDB modules handle messy-data reality: parsing irregular timestamps, excluding
-**shipment-before-order** timeline violations from delivery metrics, censoring-aware return
-logic (`Observed Return Rate = returned / (Complete + Returned)`), and a star schema with
-**no fact-to-fact relationships**.
-<!-- TODO(you): optionally add a screenshot of one advanced SQL query (e.g. the cohort or sessionization CTE) -->
-> **[OPTIONAL — ADD SQL SCREENSHOT]** e.g. the `stg.sessions` reconstruction or the cohort-retention CTE.
+**Core discoveries, grouped by dashboard page**
 
-### Stage 3 — Analyze (Python statistical & ML deep-dives)
-[`notebooks/02_statistical_deep_dives.ipynb`](notebooks/02_statistical_deep_dives.ipynb) walks
-through three methods cell-by-cell (question → query → result → chart → interpretation → caveat):
+*Acquisition & Funnel*
 
-- **Gini coefficient + Lorenz curve** — revenue concentration (Gini ≈ **0.58**).
-- **RFM segmentation (K-means)** — **66,215** customers → **3** segments (silhouette 0.33).
-- **Return propensity (logistic regression)** — honest **ROC-AUC ≈ 0.50** on this synthetic data.
+- **Two channel lenses give two different leaders.** Email leads by session volume (306K
+  sessions), but Search leads by acquisition-attributed net sales (\$5.7M — more than 4x the next
+  source). Budget decisions should be anchored to the value lens, not the volume lens.
+- **The funnel loses a comparable number of sessions at each stage, but at very different rates.**
+  Product-view → cart loses 250K sessions (a 37% drop); cart → purchase loses a nearly identical
+  250K sessions, but that's a much steeper 58% drop from a smaller base. Cart abandonment is the
+  standout *rate*, even though discovery-to-cart loses almost as many sessions in absolute terms.
+- **Cart abandonment sits close to 58% across nearly every channel and browser shown** — it looks
+  like a checkout-experience issue, not a channel-quality or browser-compatibility one.
 
-### Stage 4 — Report (Power BI)
-A 7-page report (Executive, Acquisition & Funnel, Revenue & Product Mix, Profitability & Returns,
-Customer & Cohort, Operations, Inventory) imports the Parquet exports and the model scores, with
-a DAX measure library, drill-through, field parameters, and a what-if SLA simulator. Build guide:
-[`power_bi/README.md`](power_bi/README.md).
+*Revenue, Growth & Geography*
 
-### Stage 5 — Prove reproducibility (Stage 13 notebook)
-[`notebooks/04_reproducible_build.ipynb`](notebooks/04_reproducible_build.ipynb) is the audit
-trail: it re-derives the table inventory, the validation status, the QA ledger, the headline
-model numbers, and gathers all eight figures in one gallery.
+- **Revenue survives cancellations and returns, but not cheaply.** \$10.80M gross becomes \$8.10M
+  net (−\$1.6M cancelled, −\$1.1M returned) — a **25% leakage** that Ops and merchandising can
+  attack directly.
+- **The monthly chart looks like an accelerating hockey stick — the underlying growth rate isn't
+  actually accelerating.** Year-over-year net sales growth peaked in 2020 (+227%, off a small
+  base) and has settled into a fairly steady 71–76% range for 2022–2023. The hockey-stick shape
+  is compounding on a growing base, not a genuine speed-up in the growth *rate*.
+- **China is the single largest net-sales market**, ahead of the United States — worth flagging in
+  case it differs from what a stakeholder expects.
 
----
+*Customers & Retention*
 
-## 5. Key Insights & Recommendations
-
-> Numbers below are computed from the warehouse. The dataset is **synthetic**, so patterns
-> reflect its generator, not a real market — the transferable value is the *method*.
-> <!-- TODO(you): replace/extend any bullet with your own dashboard-derived reading + screenshot -->
-
-**Core discoveries**
-
-- **Revenue survives cancellations and returns, but not cheaply.** \$10.80M gross becomes
-  \$8.10M net (−\$1.6M cancelled, −\$1.1M returned) — a **25% leakage** that Ops and merchandising
-  can attack directly.
 - **Spending is concentrated (Gini ≈ 0.58).** A minority of customers drive a disproportionate
   share of revenue — retention economics beat blanket acquisition.
-- **Three actionable customer segments.** Champions (**19,550** customers, highest value per head),
-  New/Developing (**12,977**, freshest recency), and Hibernating (**33,688**, half the base,
-  ~20 months since last order).
+- **Champions are a small slice that punches far above its weight.** Champions are only 29.5% of
+  segmented customers (19,550 of 66,215) but generate 63.3% of the combined Champions+Hibernating
+  net sales (\$4.39M vs. \$2.55M from 33,688 Hibernating customers).
+- **Newer purchase cohorts show higher month-1 retention than older ones** — a promising signal,
+  but it's based on fewer complete months of data; worth re-checking once 2024 finishes before
+  treating it as a confirmed trend rather than noise.
+
+*Product & Profitability*
+
+- **Jumpsuits & Rompers is a clear return-rate outlier** (~35%, vs. 28–30% for most other
+  categories) — a candidate for targeted investigation rather than a category-wide policy change.
+- **The return-risk model's predicted probabilities run roughly double the actual return rate in
+  every category** (e.g., Jumpsuits: 34.8% actual vs. 59.7% predicted). This is a concrete
+  illustration of why AUC ≈ 0.50 means the model isn't just weak — it's also poorly calibrated.
 - **The return model is honestly weak (AUC ≈ 0.50).** On the available pre-outcome features there
   is little signal; the right recommendation is *better feature/outcome logging*, not deploying a
   weak model.
+
+*Operations & Fulfillment*
+
 - **Delivery is uniform (~2.5 days median across all DCs).** No single distribution center is a
   bottleneck in this data — so the fulfillment lever is carrier transit, which is ~62% of the
   end-to-end clock.
+- **A 2-day delivery promise would currently be breached by ~60% of orders**, per the dashboard's
+  SLA breach simulator — a concrete number for setting realistic delivery-time claims before
+  marketing an expedited-shipping option.
 
-**Strategic actions a stakeholder could take**
+*Inventory*
 
-1. **Protect Champions, reactivate Hibernating.** Loyalty perks for the high-value tail; a
-   low-cost win-back to the 33.7k Hibernating customers where even a small lift compounds.
-2. **Attack the 25% revenue leakage** via returns/cancellation root-cause work on the highest-\$
+- **Once stock fails to sell within about six months, it tends to stay unsold indefinitely.** The
+  181+ day age bucket alone holds ~273K unsold units — nearly 8x as many as all three younger
+  buckets combined (~34K).
+- **Houston TX carries the single highest unsold-inventory cost** among distribution centers
+  (\$1.3M) — a candidate for a first clearance/markdown pass.
+
+> **A pattern to read carefully:** several operational dimensions — delivery lead time by year and
+> by distribution center, sell-through rate by category, cart abandonment by channel/browser —
+> show unusually little variation on this dataset. That's consistent with this being a synthetic,
+> generator-driven dataset rather than a genuine "everything performs identically" operational
+> result, and it's worth naming explicitly rather than presenting flat charts as confirmed findings.
+
+**Strategic actions, grouped by owner**
+
+*Customer & Retention*
+
+1. **Protect Champions, reactivate Hibernating.** Champions generate nearly double the revenue of
+   Hibernating from fewer than half as many customers — loyalty perks for the high-value tail, and
+   a low-cost win-back to the 33.7K Hibernating customers where even a small lift compounds.
+2. **Validate the newer-cohort retention signal before acting on it.** Re-check month-1 retention
+   by cohort once 2024 is a complete year; if the improvement holds, identify what changed
+   (onboarding, product mix, channel mix) around the shift.
+
+*Channel & Acquisition*
+
+3. **Anchor acquisition budget to value, not volume.** Search drives the most net sales per
+   dollar of attention; Email drives the most sessions. Make sure spend decisions use the
+   acquisition-value lens, not just session counts.
+4. **Treat checkout/cart experience as the highest-*rate* leak, without deprioritizing
+   discovery-to-cart.** Cart abandonment (58%) is the steepest single-stage drop, but
+   product-view-to-cart loses a comparable number of sessions (37% of a larger base) — both
+   deserve investment, not just checkout.
+
+*Product & Returns*
+
+5. **Attack the 25% revenue leakage** via returns/cancellation root-cause work on the highest-\$
    categories (Outerwear & Coats, Jeans, Suits & Sport Coats lead net sales).
-3. **Improve return-risk feature/outcome logging before trusting a model.** The current
+6. **Investigate Jumpsuits & Rompers specifically** (sizing guidance, fit info, product imagery)
+   given its outlier return rate, rather than a blanket returns-policy change.
+7. **Improve return-risk feature/outcome logging before trusting a model.** The current
    ROC-AUC ≈ 0.50 means the honest recommendation is better inputs, not a weak model in production.
 
-<!-- TODO(you): add 2–3 insights that you personally read off the dashboard pages, with screenshots -->
-> **[ADD YOUR OWN DASHBOARD INSIGHTS + SCREENSHOTS HERE]**
+*Operations & Fulfillment*
+
+8. **Don't advertise a 2-day delivery guarantee without operational change first.** Current
+   fulfillment would breach that promise on roughly 60% of orders today.
+
+*Inventory*
+
+9. **Prioritize a clearance/markdown review at the Houston TX distribution center**, which carries
+   the highest unsold-inventory cost.
+10. **Treat the 90–180 day unsold window as the actionable intervention point** (discount, bundle,
+    redistribute) — stock that crosses 181 days rarely sells afterward in this data.
 
 ---
 
-## 6. Repository Structure
+## 5. Repository Structure
 
 ```text
 new_analysis/
-├── 00_START_HERE.md              # Guided review order
-├── README.md                     # This file
+├── README.md                     # This file — start here
 ├── requirements.txt              # Python dependencies
 ├── src/                          # ETL + analytics automation
 │   ├── pipeline.py               #   Extract + run the SQL warehouse build
@@ -262,16 +256,52 @@ new_analysis/
 │   └── 04_reproducible_build.ipynb               # Stage 13: reproducibility + figure gallery
 ├── power_bi/                     # DAX, theme, data model, blueprint, build README
 │   └── the_look_ecommerce_performance_dashboard.pbix   # (local only — 97MB, git-ignored)
-├── docs/                         # Architecture, findings, KPI & data dictionaries, screenshots
+├── docs/                         # 4 docs: analysis, technical reference, KPI & data dictionaries
 ├── data/processed/advanced/      # Model deliverables (committed)
 ├── artifacts/                    # figures/ + validation & metrics JSON (warehouse git-ignored)
 ├── tests/                        # Project-contract unit tests
 └── private_review/               # Internal QA pack (git-ignored)
 ```
 
+**The four docs:**
+
+| Doc | Audience | Content |
+|---|---|---|
+| [`docs/analysis_and_findings.md`](docs/analysis_and_findings.md) | Business reviewer | Questions, results, advanced methods, limitations |
+| [`docs/technical_reference.md`](docs/technical_reference.md) | Data engineer | Architecture, sources, session derivation, tests, assumptions |
+| [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) | Anyone checking a number | 25 KPI definitions with grain, source, caveat |
+| [`docs/data_dictionary.md`](docs/data_dictionary.md) | Anyone using the data model | Dimension / fact / mart field reference |
+
 > Heavy generated data (the DuckDB warehouse, bulk mart exports) and the 97MB `.pbix` are
 > git-ignored — the repo ships the **code + docs + small result files + figures**, and anyone
 > can regenerate the rest in one command.
+
+---
+
+## 6. Review Paths
+
+Pick the track that matches your goal — you do **not** need to read every file.
+
+### Business / portfolio review (~20 minutes)
+
+1. This README (Sections 1, 2, 4)
+2. [`docs/analysis_and_findings.md`](docs/analysis_and_findings.md)
+3. [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md)
+4. [`notebooks/02_statistical_deep_dives.ipynb`](notebooks/02_statistical_deep_dives.ipynb)
+
+### Data-engineering / SQL review (~30 minutes)
+
+1. [`docs/technical_reference.md`](docs/technical_reference.md)
+2. [`docs/data_dictionary.md`](docs/data_dictionary.md)
+3. `sql/duckdb/01_staging.sql` through `07_quality_and_snapshots.sql`
+4. [`notebooks/03_event_sessionization_audit.ipynb`](notebooks/03_event_sessionization_audit.ipynb)
+
+### Power BI build
+
+1. [`power_bi/README.md`](power_bi/README.md)
+2. `power_bi/data_model.md` and `power_bi/model_relationships.csv`
+3. `power_bi/measures.dax`
+4. `power_bi/dashboard_blueprint.md`
 
 ---
 
@@ -291,7 +321,7 @@ python src/run_all.py --source-csv-dir "<folder with the 7 original CSVs>" --reb
 
 **3. Review the outputs**
 
-- Findings: [`docs/analysis_findings.md`](docs/analysis_findings.md)
+- Findings: [`docs/analysis_and_findings.md`](docs/analysis_and_findings.md)
 - Validation passed: [`private_review/validation_report.md`](private_review/validation_report.md)
 - Reproducibility trail: [`notebooks/04_reproducible_build.ipynb`](notebooks/04_reproducible_build.ipynb)
 

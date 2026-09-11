@@ -2,7 +2,7 @@
 
 ## Before opening Power BI
 
-1. Read `../00_START_HERE.md`.
+1. Read `../README.md`.
 2. Confirm `../private_review/validation_report.md` says `PASS`.
 3. Confirm `../private_review/session_lineage_audit.md` shows event and session reconciliation.
 
