@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 from pipeline import run as run_pipeline
@@ -28,10 +26,7 @@ def main() -> None:
     source_csv_dir = args.source_csv_dir.resolve()
     python = sys.executable
 
-    steps: list[dict[str, str]] = []
-    started = datetime.now(timezone.utc)
     run_pipeline(project_root, source_csv_dir, args.rebuild)
-    steps.append({"step": "warehouse_pipeline", "status": "completed"})
 
     for script in (
         "advanced_analytics.py",
@@ -47,7 +42,6 @@ def main() -> None:
             ],
             project_root,
         )
-        steps.append({"step": script, "status": "completed"})
 
     for notebook in (
         "notebooks/01_data_quality_and_core_analysis.ipynb",
@@ -69,7 +63,6 @@ def main() -> None:
             ],
             project_root,
         )
-        steps.append({"step": f"execute:{notebook}", "status": "completed"})
 
     run_command(
         [
@@ -80,21 +73,6 @@ def main() -> None:
         ],
         project_root,
     )
-    steps.append({"step": "validate_project", "status": "completed"})
-
-    finished = datetime.now(timezone.utc)
-    execution = {
-        "started_at_utc": started.isoformat(),
-        "finished_at_utc": finished.isoformat(),
-        "elapsed_seconds": (finished - started).total_seconds(),
-        "source_csv_dir": str(source_csv_dir),
-        "project_root": str(project_root),
-        "steps": steps,
-    }
-    log_path = project_root / "private_review" / "execution_log.json"
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text(json.dumps(execution, indent=2), encoding="utf-8")
-    print(json.dumps(execution, indent=2))
 
 
 if __name__ == "__main__":

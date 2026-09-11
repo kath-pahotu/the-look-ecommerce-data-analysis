@@ -1,62 +1,12 @@
 {
-  "database_path": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\artifacts\\thelook_analytics.duckdb",
-  "source_csv_dir": "C:\\Users\\phanh\\data_analysis\\p_projects\\the_look_ecommerce\\original_analysis\\5_the_look_ecommerce\\csv_version\\3_thelookecommerce",
-  "source_policy": {
-    "original_dataset_files": [
-      "users.csv",
-      "products.csv",
-      "orders.csv",
-      "order_items.csv",
-      "events.csv",
-      "inventory_events.csv",
-      "distribution_centers.csv"
-    ],
-    "session_fact_derived_from": "events.csv grouped by session_id",
-    "legacy_derived_session_file_required": false
-  },
-  "source_inventory": [
-    {
-      "file": "users.csv",
-      "bytes": 16566424,
-      "modified_at": 1773391950.4845185,
-      "sha256": "695dbb4aedc358c28174a515714a9642e1ef792f837fa460e51ea57993925245"
-    },
-    {
-      "file": "products.csv",
-      "bytes": 4316084,
-      "modified_at": 1773391950.3850539,
-      "sha256": "b38f1c006daaebbeb09cd6d0e22068f2a29ea4b48c8a920edcb056e1f3bfc5b7"
-    },
-    {
-      "file": "orders.csv",
-      "bytes": 9733931,
-      "modified_at": 1773391950.3630936,
-      "sha256": "dce6a83f16a270cf69cd3a3b79a3ee25814ecae56d50ad706b482ded234e2c05"
-    },
-    {
-      "file": "order_items.csv",
-      "bytes": 18883612,
-      "modified_at": 1773391950.5929427,
-      "sha256": "becc82efe86082f29b47dc8a0460b625104a1db3b4acb4315df4f1f245af5bd9"
-    },
-    {
-      "file": "events.csv",
-      "bytes": 384444587,
-      "modified_at": 1773391950.3141582,
-      "sha256": "0cb3f3c4a17be80473a47b2ba27fe8052ee0615f935bb204a5d07dc7a1475dc9"
-    },
-    {
-      "file": "inventory_events.csv",
-      "bytes": 91956433,
-      "modified_at": 1773391950.9261336,
-      "sha256": "8168c7e4cfec08df7e23232af03b1fc94b209d4eae7109fb328a6402be32069c"
-    },
-    {
-      "file": "distribution_centers.csv",
-      "bytes": 368,
-      "modified_at": 1773391950.316156,
-      "sha256": "6d9ba37bdb2d56fbeb04a51c624e2e788ea33b6f281d22b4751896068bdd0fa6"
-    }
+  "source_files": [
+    "users.csv",
+    "products.csv",
+    "orders.csv",
+    "order_items.csv",
+    "events.csv",
+    "inventory_events.csv",
+    "distribution_centers.csv"
   ],
   "raw_row_counts": {
     "users": 100000,
@@ -68,211 +18,40 @@
     "distribution_centers": 10
   },
   "sql_modules": [
-    {
-      "module": "01_staging.sql",
-      "seconds": 0.028
-    },
-    {
-      "module": "02_core_dimensions.sql",
-      "seconds": 1.115
-    },
-    {
-      "module": "03_core_facts.sql",
-      "seconds": 2.504
-    },
-    {
-      "module": "04_mart_acquisition_funnel.sql",
-      "seconds": 0.121
-    },
-    {
-      "module": "05_mart_commercial_customer.sql",
-      "seconds": 1.398
-    },
-    {
-      "module": "06_mart_operations_inventory.sql",
-      "seconds": 0.105
-    },
-    {
-      "module": "07_quality_and_snapshots.sql",
-      "seconds": 1.591
-    }
+    "01_staging.sql",
+    "02_core_dimensions.sql",
+    "03_core_facts.sql",
+    "04_mart_acquisition_funnel.sql",
+    "05_mart_commercial_customer.sql",
+    "06_mart_operations_inventory.sql",
+    "07_quality_and_snapshots.sql"
   ],
-  "power_bi_exports": [
-    {
-      "schema": "core",
-      "table": "dim_date",
-      "rows": 1994,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\dim_date.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\dim_date.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "dim_customer",
-      "rows": 100000,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\dim_customer.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\dim_customer.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "dim_product",
-      "rows": 29120,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\dim_product.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\dim_product.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "dim_distribution_center",
-      "rows": 10,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\dim_distribution_center.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\dim_distribution_center.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "dim_session_traffic_source",
-      "rows": 5,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\dim_session_traffic_source.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\dim_session_traffic_source.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "dim_acquisition_source",
-      "rows": 5,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\dim_acquisition_source.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\dim_acquisition_source.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "fact_order",
-      "rows": 124814,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\fact_order.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\fact_order.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "fact_order_item",
-      "rows": 180862,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\fact_order_item.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\fact_order_item.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "fact_session",
-      "rows": 680862,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\fact_session.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\fact_session.parquet"
-    },
-    {
-      "schema": "core",
-      "table": "fact_inventory",
-      "rows": 488146,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\fact_inventory.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\fact_inventory.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "funnel_stage_channel",
-      "rows": 20,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\funnel_stage_channel.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\funnel_stage_channel.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "funnel_monthly_channel",
-      "rows": 325,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\funnel_monthly_channel.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\funnel_monthly_channel.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "channel_quality",
-      "rows": 5,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\channel_quality.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\channel_quality.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "acquisition_source_value",
-      "rows": 5,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\acquisition_source_value.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\acquisition_source_value.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "cart_abandonment_segments",
-      "rows": 22,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\cart_abandonment_segments.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\cart_abandonment_segments.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "sales_monthly",
-      "rows": 65,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\sales_monthly.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\sales_monthly.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "customer_360",
-      "rows": 80095,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\customer_360.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\customer_360.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "cohort_retention",
-      "rows": 1936,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\cohort_retention.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\cohort_retention.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "product_performance_category",
-      "rows": 36,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\product_performance_category.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\product_performance_category.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "product_performance_brand",
-      "rows": 2755,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\product_performance_brand.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\product_performance_brand.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "geography_performance_country",
-      "rows": 15,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\geography_performance_country.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\geography_performance_country.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "delivery_performance_dc",
-      "rows": 10,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\delivery_performance_dc.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\delivery_performance_dc.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "operations_monthly",
-      "rows": 65,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\operations_monthly.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\operations_monthly.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "return_risk_segments",
-      "rows": 48,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\return_risk_segments.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\return_risk_segments.parquet"
-    },
-    {
-      "schema": "mart",
-      "table": "inventory_performance",
-      "rows": 356,
-      "csv": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\csv\\inventory_performance.csv",
-      "parquet": "C:\\Users\\phanh\\OneDrive\\Tài liệu\\The Hau\\tmp\\thelook_new_analysis_stage\\data\\processed\\power_bi\\parquet\\inventory_performance.parquet"
-    }
+  "power_bi_tables": [
+    {"schema": "core", "table": "dim_date", "rows": 1994},
+    {"schema": "core", "table": "dim_customer", "rows": 100000},
+    {"schema": "core", "table": "dim_product", "rows": 29120},
+    {"schema": "core", "table": "dim_distribution_center", "rows": 10},
+    {"schema": "core", "table": "dim_session_traffic_source", "rows": 5},
+    {"schema": "core", "table": "dim_acquisition_source", "rows": 5},
+    {"schema": "core", "table": "fact_order", "rows": 124814},
+    {"schema": "core", "table": "fact_order_item", "rows": 180862},
+    {"schema": "core", "table": "fact_session", "rows": 680862},
+    {"schema": "core", "table": "fact_inventory", "rows": 488146},
+    {"schema": "mart", "table": "funnel_stage_channel", "rows": 20},
+    {"schema": "mart", "table": "funnel_monthly_channel", "rows": 325},
+    {"schema": "mart", "table": "channel_quality", "rows": 5},
+    {"schema": "mart", "table": "acquisition_source_value", "rows": 5},
+    {"schema": "mart", "table": "cart_abandonment_segments", "rows": 22},
+    {"schema": "mart", "table": "sales_monthly", "rows": 65},
+    {"schema": "mart", "table": "customer_360", "rows": 80095},
+    {"schema": "mart", "table": "cohort_retention", "rows": 1936},
+    {"schema": "mart", "table": "product_performance_category", "rows": 36},
+    {"schema": "mart", "table": "product_performance_brand", "rows": 2755},
+    {"schema": "mart", "table": "geography_performance_country", "rows": 15},
+    {"schema": "mart", "table": "delivery_performance_dc", "rows": 10},
+    {"schema": "mart", "table": "operations_monthly", "rows": 65},
+    {"schema": "mart", "table": "return_risk_segments", "rows": 48},
+    {"schema": "mart", "table": "inventory_performance", "rows": 356}
   ],
   "qa_status": {
     "WARN": 3,

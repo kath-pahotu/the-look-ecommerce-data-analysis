@@ -108,44 +108,9 @@ The pipeline blocks the build when:
 - Distinct event session IDs do not reconcile to fact-session rows
 - Source event rows do not reconcile to the sum of session event counts
 
-## Testing & validation strategy
+## Testing & validation
 
-### Source-contract checks
-
-- Raw schema contains exactly the seven original tables
-- Pipeline metadata lists exactly seven source files
-- No implementation file loads a legacy derived session source
-- Sessions are created from `events.csv` grouped by `session_id`
-
-### Data-quality checks
-
-- Primary-key uniqueness
-- Source-to-model row reconciliation
-- Referential integrity
-- Nonnegative price/cost and cost ≤ retail
-- Order/customer/product coverage
-- Timestamp sequence validity
-- Partial-period flagging
-- Event identity completeness documentation
-
-### Analytical validation
-
-- Gross sales independently reconciles to source `sale_price`
-- Orders and items reconcile exactly
-- Session metrics reconcile directly to the event source
-- Rates use visible numerators and denominators
-- Lead-time metrics filter invalid sequences
-- Model validation uses an out-of-time holdout
-- Statistical significance is paired with effect size or practical interpretation
-
-### Artifact validation
-
-- All three notebooks execute top-to-bottom with no error outputs
-- Required Power BI files and DAX measures exist
-- Theme JSON parses
-- CSV and Parquet export sets contain exactly the approved 25 tables
-- Generated PNGs meet resolution and nonblank checks
-- Customer PII is absent from Power BI exports
+The `qa` schema runs primary-key uniqueness, source-to-model row reconciliation, referential integrity, and timestamp checks. `src/validate_project.py` confirms the warehouse exists and all QA tests pass before the build completes. Notebooks 01 and 03 execute top-to-bottom as part of the build.
 
 ## Assumptions & limitations
 

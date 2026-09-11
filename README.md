@@ -1,6 +1,6 @@
 # The Look eCommerce — End-to-End Retail Analytics & BI Pipeline
 
-**SQL data warehouse · Python analytics & ML · Power BI dashboard — built from seven raw CSVs, validated by 20+ automated contracts, and reproducible with one command.**
+**SQL data warehouse · Python analytics & ML · Power BI dashboard — built from seven raw CSVs, reproducible with one command.**
 
 <!-- TODO(you): paste your live dashboard link here once published, e.g. Publish-to-web URL -->
 🔗 **Live dashboard:** [View the interactive Power BI report](https://app.powerbi.com/view?r=eyJrIjoiNmZiNzVmYzQtZTE4OC00ZTM0LThmZDYtNThmMzQ5MjljNGMxIiwidCI6IjNkZmNkMTY2LWYzZmUtNGQxNS1hNDYzLTA0NTU2YzMwNWZmMiIsImMiOjEwfQ%3D%3D)
@@ -103,8 +103,7 @@ Days-to-Sell.
 This is a **local ELT pipeline** — run entirely on one machine, loading raw first and then
 transforming *inside* the warehouse with SQL (`raw → stg → core → mart → qa`), the pattern most
 analytics-engineering roles use today. Everything is triggered by **one command**
-(`python src/run_all.py --rebuild`) and gated by `src/validate_project.py`, which fails the build
-unless 20+ contracts hold.
+(`python src/run_all.py --rebuild`).
 
 > **Full architecture** — the layer diagram, layer responsibilities, declared grains, source
 > contract, and event-to-session derivation are documented in
@@ -243,9 +242,9 @@ new_analysis/
 ├── src/                          # ETL + analytics automation
 │   ├── pipeline.py               #   Extract + run the SQL warehouse build
 │   ├── advanced_analytics.py     #   RFM segmentation + return-propensity model
-│   ├── render_outputs.py         #   Generate the 8 figures
+│   ├── render_outputs.py         #   Generate figures from warehouse queries
 │   ├── build_notebooks.py        #   Regenerate notebooks 01 & 03 from live numbers
-│   ├── validate_project.py       #   20+ contract checks (build gate)
+│   ├── validate_project.py       #   Smoke test (DB exists, QA passes)
 │   └── run_all.py                #   One-command orchestrator
 ├── sql/
 │   └── duckdb/                   # 01_staging → 07_quality_and_snapshots (reference build)
@@ -258,9 +257,8 @@ new_analysis/
 │   └── the_look_ecommerce_performance_dashboard.pbix   # (local only — 97MB, git-ignored)
 ├── docs/                         # 4 docs: analysis, technical reference, KPI & data dictionaries
 ├── data/processed/advanced/      # Model deliverables (committed)
-├── artifacts/                    # figures/ + validation & metrics JSON (warehouse git-ignored)
-├── tests/                        # Project-contract unit tests
-└── private_review/               # Internal QA pack (git-ignored)
+├── artifacts/                    # figures/ + metrics JSON (warehouse git-ignored)
+└── private_review/               # Internal QA notes (git-ignored)
 ```
 
 **The four docs:**
@@ -322,7 +320,6 @@ python src/run_all.py --source-csv-dir "<folder with the 7 original CSVs>" --reb
 **3. Review the outputs**
 
 - Findings: [`docs/analysis_and_findings.md`](docs/analysis_and_findings.md)
-- Validation passed: [`private_review/validation_report.md`](private_review/validation_report.md)
 - Reproducibility trail: [`notebooks/04_reproducible_build.ipynb`](notebooks/04_reproducible_build.ipynb)
 
 **4. Build / open the dashboard**

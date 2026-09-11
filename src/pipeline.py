@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import logging
 import time
@@ -83,25 +82,14 @@ def sql_literal(path: Path) -> str:
     return str(path.resolve()).replace("\\", "/").replace("'", "''")
 
 
-def source_inventory(csv_dir: Path) -> list[dict[str, object]]:
-    inventory: list[dict[str, object]] = []
+def check_source_files(csv_dir: Path) -> list[str]:
+    files: list[str] = []
     for name in ORIGINAL_SOURCE_TABLES:
         path = csv_dir / f"{name}.csv"
         if not path.exists():
             raise FileNotFoundError(f"Required source file is missing: {path}")
-        digest = hashlib.sha256()
-        with path.open("rb") as stream:
-            for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
-                digest.update(chunk)
-        inventory.append(
-            {
-                "file": path.name,
-                "bytes": path.stat().st_size,
-                "modified_at": path.stat().st_mtime,
-                "sha256": digest.hexdigest(),
-            }
-        )
-    return inventory
+        files.append(path.name)
+    return files
 
 
 def ingest_raw(connection: duckdb.DuckDBPyConnection, csv_dir: Path) -> None:
@@ -125,19 +113,13 @@ def ingest_raw(connection: duckdb.DuckDBPyConnection, csv_dir: Path) -> None:
 
 def execute_sql_modules(
     connection: duckdb.DuckDBPyConnection, sql_dir: Path
-) -> list[dict[str, object]]:
-    records: list[dict[str, object]] = []
+) -> list[str]:
+    modules: list[str] = []
     for path in sorted(sql_dir.glob("*.sql")):
-        started = time.perf_counter()
         logging.info("Executing %s", path.name)
         connection.execute(path.read_text(encoding="utf-8"))
-        records.append(
-            {
-                "module": path.name,
-                "seconds": round(time.perf_counter() - started, 3),
-            }
-        )
-    return records
+        modules.append(path.name)
+    return modules
 
 
 def export_table(
@@ -189,13 +171,13 @@ def run(project_root: Path, csv_dir: Path, rebuild: bool) -> dict[str, object]:
             database_path.unlink()
 
     started = time.perf_counter()
-    inventory = source_inventory(csv_dir)
+    source_files = check_source_files(csv_dir)
     connection = duckdb.connect(str(database_path))
     try:
         connection.execute("SET threads = 4")
         connection.execute("SET preserve_insertion_order = false")
         ingest_raw(connection, csv_dir)
-        module_runs = execute_sql_modules(
+        sql_modules = execute_sql_modules(
             connection, project_root / "sql" / "duckdb"
         )
 
@@ -241,19 +223,13 @@ def run(project_root: Path, csv_dir: Path, rebuild: bool) -> dict[str, object]:
         connection.close()
 
     metadata = {
-        "database_path": str(database_path),
-        "source_csv_dir": str(csv_dir.resolve()),
-        "source_policy": {
-            "original_dataset_files": [
-                f"{table}.csv" for table in ORIGINAL_SOURCE_TABLES
-            ],
-            "session_fact_derived_from": "events.csv grouped by session_id",
-            "legacy_derived_session_file_required": False,
-        },
-        "source_inventory": inventory,
+        "source_files": source_files,
         "raw_row_counts": raw_counts,
-        "sql_modules": module_runs,
-        "power_bi_exports": exports,
+        "sql_modules": sql_modules,
+        "power_bi_tables": [
+            {"schema": e["schema"], "table": e["table"], "rows": e["rows"]}
+            for e in exports
+        ],
         "qa_status": qa_status,
         "elapsed_seconds": round(time.perf_counter() - started, 3),
     }

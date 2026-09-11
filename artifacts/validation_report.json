@@ -1,24 +1,4 @@
 {
   "status": "PASS",
-  "errors": [],
-  "warnings": [
-    "3 documented data-quality warnings remain"
-  ],
-  "raw_tables_checked": [
-    "distribution_centers",
-    "events",
-    "inventory_events",
-    "order_items",
-    "orders",
-    "products",
-    "users"
-  ],
-  "session_lineage": {
-    "source_events": 2420661,
-    "source_sessions": 680862,
-    "fact_sessions": 680862,
-    "modeled_session_events": 2420661
-  },
-  "figures_checked": 8,
-  "notebooks_checked": 4
+  "errors": []
 }
