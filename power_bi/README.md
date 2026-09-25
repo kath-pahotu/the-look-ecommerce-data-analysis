@@ -3,8 +3,8 @@
 ## Before opening Power BI
 
 1. Read `../README.md`.
-2. Confirm `../private_review/validation_report.md` says `PASS`.
-3. Confirm `../private_review/session_lineage_audit.md` shows event and session reconciliation.
+2. Confirm `../artifacts/validation_report.json` says `PASS` and review `qa.test_results` for warnings.
+3. Review session lineage in `../docs/technical_reference.md` and the reconciliation checks in `../sql/duckdb/07_quality_and_snapshots.sql`.
 
 `fact_session` is already reconstructed from `events.csv` by the backend SQL. Do not import a separate session source file.
 

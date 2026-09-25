@@ -2,7 +2,6 @@
 
 **SQL data warehouse · Python analytics & ML · Power BI dashboard — built from seven raw CSVs, reproducible with one command.**
 
-<!-- TODO(you): paste your live dashboard link here once published, e.g. Publish-to-web URL -->
 🔗 **Live dashboard:** [View the interactive Power BI report](https://app.powerbi.com/view?r=eyJrIjoiNmZiNzVmYzQtZTE4OC00ZTM0LThmZDYtNThmMzQ5MjljNGMxIiwidCI6IjNkZmNkMTY2LWYzZmUtNGQxNS1hNDYzLTA0NTU2YzMwNWZmMiIsImMiOjEwfQ%3D%3D)
 
 ---
@@ -129,8 +128,7 @@ analytics-engineering roles use today. Everything is triggered by **one command*
   Product-view → cart loses 250K sessions (a 37% drop); cart → purchase loses a nearly identical
   250K sessions, but that's a much steeper 58% drop from a smaller base. Cart abandonment is the
   standout *rate*, even though discovery-to-cart loses almost as many sessions in absolute terms.
-- **Cart abandonment sits close to 58% across nearly every channel and browser shown** — it looks
-  like a checkout-experience issue, not a channel-quality or browser-compatibility one.
+- **Cart abandonment sits close to 58% across nearly every channel and browser shown** — checkout friction is one hypothesis to investigate. Similar aggregate rates do not identify the cause or rule out channel and browser effects.
 
 *Revenue, Growth & Geography*
 
@@ -147,7 +145,7 @@ analytics-engineering roles use today. Everything is triggered by **one command*
 *Customers & Retention*
 
 - **Spending is concentrated (Gini ≈ 0.58).** A minority of customers drive a disproportionate
-  share of revenue — retention economics beat blanket acquisition.
+  share of revenue — a retention test is worth investigating; comparative economics require intervention cost and incremental-response evidence.
 - **Champions are a small slice that punches far above its weight.** Champions are only 29.5% of
   segmented customers (19,550 of 66,215) but generate 63.3% of the combined Champions+Hibernating
   net sales (\$4.39M vs. \$2.55M from 33,688 Hibernating customers).
@@ -160,8 +158,7 @@ analytics-engineering roles use today. Everything is triggered by **one command*
 - **Jumpsuits & Rompers is a clear return-rate outlier** (~35%, vs. 28–30% for most other
   categories) — a candidate for targeted investigation rather than a category-wide policy change.
 - **The return-risk model's predicted probabilities run roughly double the actual return rate in
-  every category** (e.g., Jumpsuits: 34.8% actual vs. 59.7% predicted). This is a concrete
-  illustration of why AUC ≈ 0.50 means the model isn't just weak — it's also poorly calibrated.
+  every category** (e.g., Jumpsuits: 34.8% actual vs. 59.7% predicted). This aggregate comparison raises a separate calibration concern; ROC-AUC near 0.50 describes weak ranking and does not itself measure calibration.
 - **The return model is honestly weak (AUC ≈ 0.50).** On the available pre-outcome features there
   is little signal; the right recommendation is *better feature/outcome logging*, not deploying a
   weak model.
@@ -177,7 +174,7 @@ analytics-engineering roles use today. Everything is triggered by **one command*
 
 *Inventory*
 
-- **Once stock fails to sell within about six months, it tends to stay unsold indefinitely.** The
+- **Aged stock dominates the unsold-inventory snapshot.** The
   181+ day age bucket alone holds ~273K unsold units — nearly 8x as many as all three younger
   buckets combined (~34K).
 - **Houston TX carries the single highest unsold-inventory cost** among distribution centers
@@ -202,9 +199,7 @@ analytics-engineering roles use today. Everything is triggered by **one command*
 
 *Channel & Acquisition*
 
-3. **Anchor acquisition budget to value, not volume.** Search drives the most net sales per
-   dollar of attention; Email drives the most sessions. Make sure spend decisions use the
-   acquisition-value lens, not just session counts.
+3. **Anchor acquisition budget to value, not volume.** Search has the largest acquisition-attributed net sales in this dataset; Email has the most sessions. Compare those scopes before forming a budget hypothesis. Without spend and incremental-outcome data, neither is a demonstrated channel-efficiency ranking.
 4. **Treat checkout/cart experience as the highest-*rate* leak, without deprioritizing
    discovery-to-cart.** Cart abandonment (58%) is the steepest single-stage drop, but
    product-view-to-cart loses a comparable number of sessions (37% of a larger base) — both
@@ -229,7 +224,7 @@ analytics-engineering roles use today. Everything is triggered by **one command*
 9. **Prioritize a clearance/markdown review at the Houston TX distribution center**, which carries
    the highest unsold-inventory cost.
 10. **Treat the 90–180 day unsold window as the actionable intervention point** (discount, bundle,
-    redistribute) — stock that crosses 181 days rarely sells afterward in this data.
+    redistribute) — the snapshot identifies a large aged-stock balance, but does not estimate its future probability of sale.
 
 ---
 
@@ -343,3 +338,9 @@ python src/run_all.py --source-csv-dir "<folder with the 7 original CSVs>" --reb
 
 - Public docs and Power BI exports contain **no** names, emails, street addresses, or IP addresses.
 - The dataset is synthetic; weak model results are reported as weak, never rewritten as wins.
+
+## Interpretation boundaries
+
+“Net Profit” is the existing project KPI: net sales less product cost for retained items. It excludes operating, acquisition and other unprovided costs; it is not an audited bottom-line profit measure. Keep this formula visible when interpreting the 51.9% margin.
+
+Synthetic snapshots support method demonstrations, descriptive diagnosis and hypotheses for validation. They do not establish intervention ROI, future inventory survival or a causal checkout bottleneck. The source/status definitions and event-to-session reconciliation are the checks that would most change the reported operating picture.
