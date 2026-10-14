@@ -55,19 +55,33 @@ FROM core.fact_order_item f
 JOIN core.dim_product p ON f.product_id = p.product_id
 GROUP BY p.brand;
 
+-- Geography reports on the CONFORMED country, not the raw source spelling.
+-- TheLook's users.csv carries local-language variants (Espana, Deutschland)
+-- and a Portuguese spelling of Brazil. Grouping on the raw value splits a
+-- single market into two phantom markets, so this mart joins through
+-- core.dim_country and reports canonical_country plus region. The source
+-- spelling is retained in source_spellings so the mapping stays auditable
+-- from the dashboard itself.
 CREATE OR REPLACE TABLE mart.geography_performance_country AS
 SELECT
-    c.country,
+    co.canonical_country AS country,
+    co.region,
+    co.sub_region,
     COUNT(DISTINCT f.order_id) AS orders,
     COUNT(DISTINCT f.customer_id) AS customers,
     COUNT(*) AS items,
     SUM(f.net_sales_value) AS net_sales_value,
     SUM(f.net_profit_value) AS net_profit_value,
     SUM(f.net_sales_value) / NULLIF(COUNT(DISTINCT f.order_id), 0) AS average_order_value,
-    SUM(f.returned_item_flag)::DOUBLE / NULLIF(SUM(f.return_observation_eligible_flag), 0) AS observed_return_rate
+    SUM(f.returned_item_flag)::DOUBLE / NULLIF(SUM(f.return_observation_eligible_flag), 0) AS observed_return_rate,
+    STRING_AGG(DISTINCT c.country, ' | ') AS source_spellings
 FROM core.fact_order_item f
 JOIN core.dim_customer c ON f.customer_id = c.user_id
-GROUP BY c.country;
+JOIN (
+    SELECT DISTINCT source_country_value, canonical_country, region, sub_region
+    FROM core.dim_country
+) co ON c.country = co.source_country_value
+GROUP BY co.canonical_country, co.region, co.sub_region;
 
 CREATE OR REPLACE TABLE mart.customer_360 AS
 WITH as_of AS (SELECT MAX(order_item_created_at)::DATE AS as_of_date FROM core.fact_order_item),

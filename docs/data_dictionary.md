@@ -1,5 +1,11 @@
 # Modeled data dictionary
 
+> A written summary of what each modelled object is **for**. For the full
+> column-level catalogue - every table, every column, with type, null count,
+> distinct count and a real example value - see
+> [`warehouse_catalogue.md`](warehouse_catalogue.md), which is generated from the
+> live warehouse on every build.
+
 ## Dimensions
 
 ### `dim_date`

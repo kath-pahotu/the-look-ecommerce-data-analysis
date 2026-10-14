@@ -41,11 +41,15 @@ Customer acquisition-source value is analyzed separately because its taxonomy (S
 | Email | 4,058 | 6,280 | $412,225 | $102 |
 | Display | 3,206 | 4,981 | $319,750 | $100 |
 
-By country, China is the single largest net-sales market, ahead of every other country individually (including the United States, which ranks second) — see `mart.geography_performance_country` for the full breakdown. *(This paragraph reflects a dashboard read; the exact dollar figure populates automatically after the next `--rebuild`.)*
+By country, China is the single largest net-sales market, ahead of every other country individually (including the United States, which ranks second) - see `mart.geography_performance_country` for the full breakdown. 
 
 ### 2. Revenue and growth
 
 **Questions addressed:** How do gross sales, net sales, profit, customers, orders, and AOV move over time? Is growth driven by volume or basket value? Which trends are valid after excluding the incomplete latest month?
+
+> **This question is answered quantitatively in**
+> [`commercial_analytics.md` section 5](commercial_analytics.md#5-price-volume-mix-bridge).
+> The price-volume-mix bridge decomposes the YTD movement into **98.4% volume, 2.2% price, > -0.6% mix**, with average selling price moving only $59.59 to $60.15. Growth is almost > entirely units, not basket value - which means it is fully exposed to traffic and > conversion, and that price and mix remain unused levers.
 
 | Year | Net Sales (complete months) |
 |---|---|
@@ -84,6 +88,10 @@ Champions make up only 29.5% of segmented customers (19,550 of 66,215) but gener
 
 - Inventory units: 488,146; sold units: 180,862; sell-through: 37.1%.
 - Unsold inventory cost: $8,833,075; aged 181+ day units: 272,822.
+- This aged-stock figure is what the **downside scenario** in
+  [`commercial_analytics.md` section 7](commercial_analytics.md#7-scenarios) is built on:
+  clearing 273K aged units means discounting, which is why that scenario carries a
+  2-point margin reduction rather than an unexplained multiplier.
 - 35,440 order-item rows (19.6%) have `shipped_at < created_at`. Delivery metrics exclude those rows and display valid-record coverage.
 
 ## Advanced methods
@@ -131,6 +139,10 @@ Champions make up only 29.5% of segmented customers (19,550 of 66,215) but gener
 **Result:** 488 directional category rules from 93,696 eligible orders. Use lift with support and pair count; do not rank on lift alone.
 
 The data has no randomized assignment table, so a historical A/B effect cannot be estimated. A forward-looking power plan is included instead (see `docs/technical_reference.md`).
+
+## Where this analysis continues
+
+This document covers what the transactional data says about what **happened**. The forward-looking half of the project - plan consolidation and validation, the price-volume-mix bridge, the backtested forecast and the scenario layer - is in [`commercial_analytics.md`](commercial_analytics.md), which also states which commercial concepts this dataset cannot support and what each would require.
 
 ## Material limitations
 

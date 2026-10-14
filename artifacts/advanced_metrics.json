@@ -2,31 +2,31 @@
   "rfm_segmentation": {
     "customers_segmented": 66215,
     "selected_k": 3,
-    "silhouette_selected_k": 0.3318993668504282,
+    "silhouette_selected_k": 0.3437193875551566,
     "segments": [
       {
         "segment": "Champions",
-        "customers": 19550,
-        "median_recency_days": 190.0,
-        "mean_order_count": 2.714833759590793,
-        "median_net_sales": 180.55999660491943,
-        "total_net_sales": 4388338.183672328
+        "customers": 19697,
+        "median_recency_days": 192.0,
+        "mean_order_count": 2.720921967812357,
+        "median_net_sales": 175.31999969482422,
+        "total_net_sales": 4285073.07368936
       },
       {
         "segment": "New / Developing",
-        "customers": 12977,
+        "customers": 13007,
         "median_recency_days": 32.0,
-        "mean_order_count": 1.392848886491485,
-        "median_net_sales": 61.9900016784668,
-        "total_net_sales": 1161675.8913868852
+        "mean_order_count": 1.3914046282770816,
+        "median_net_sales": 63.0,
+        "total_net_sales": 1209493.0614196248
       },
       {
         "segment": "Hibernating",
-        "customers": 33688,
-        "median_recency_days": 502.0,
-        "mean_order_count": 1.1374970315839468,
+        "customers": 33511,
+        "median_recency_days": 504.0,
+        "mean_order_count": 1.1273313240428515,
         "median_net_sales": 50.9900016784668,
-        "total_net_sales": 2546517.403458275
+        "total_net_sales": 2601965.3434085026
       }
     ]
   },
@@ -38,8 +38,8 @@
     "test_start": "2023-01-01",
     "test_return_rate": 0.288322673818857,
     "roc_auc": 0.5008373241721014,
-    "average_precision": 0.28886766046252493,
-    "brier_score": 0.24936136320723443,
+    "average_precision": 0.2888676507483017,
+    "brier_score": 0.2493613651784645,
     "top_decile_return_rate": 0.28674574522949975,
     "top_decile_lift": 0.9945306813076102,
     "interpretation": "AUC near 0.50 indicates limited predictive signal in the available pre-outcome features; use this as a methodology demonstration, not a production scoring system."
@@ -65,19 +65,19 @@
         "lift": 1.5967098760523055
       },
       {
-        "antecedent": "Suits",
-        "consequent": "Socks & Hosiery",
-        "pair_orders": 36,
-        "support": 0.00038422131147540983,
-        "confidence": 0.046511627906976744,
-        "lift": 1.544278344568424
-      },
-      {
         "antecedent": "Socks & Hosiery",
         "consequent": "Suits",
         "pair_orders": 36,
         "support": 0.00038422131147540983,
         "confidence": 0.012756909992912827,
+        "lift": 1.544278344568424
+      },
+      {
+        "antecedent": "Suits",
+        "consequent": "Socks & Hosiery",
+        "pair_orders": 36,
+        "support": 0.00038422131147540983,
+        "confidence": 0.046511627906976744,
         "lift": 1.544278344568424
       },
       {

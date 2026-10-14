@@ -1,0 +1,17 @@
+source_country_value,canonical_country,region,sub_region,is_alias,alias_reason
+China,China,APAC,Greater China,0,
+United States,United States,AMER,North America,0,
+Brasil,Brazil,AMER,South America,1,Portuguese-language spelling emitted by the source system
+South Korea,South Korea,APAC,North Asia,0,
+United Kingdom,United Kingdom,EMEA,Western Europe,0,
+France,France,EMEA,Western Europe,0,
+Germany,Germany,EMEA,DACH,0,
+Spain,Spain,EMEA,Iberia,0,
+Japan,Japan,APAC,North Asia,0,
+Australia,Australia,APAC,Oceania,0,
+Belgium,Belgium,EMEA,Benelux,0,
+Poland,Poland,EMEA,Central Europe,0,
+Colombia,Colombia,AMER,South America,0,
+España,Spain,EMEA,Iberia,1,Local-language spelling of Spain found in source users.csv
+Deutschland,Germany,EMEA,DACH,1,Local-language spelling of Germany found in source users.csv
+Unknown,Unknown,Unassigned,Unassigned,0,Customers with no country recorded

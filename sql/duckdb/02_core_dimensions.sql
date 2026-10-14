@@ -33,7 +33,29 @@ SELECT
     EXTRACT(isodow FROM calendar_date)::INTEGER AS iso_day_of_week,
     strftime(calendar_date, '%A') AS day_name,
     CASE WHEN EXTRACT(isodow FROM calendar_date) IN (6, 7) THEN 1 ELSE 0 END AS is_weekend,
-    CASE WHEN calendar_date < date_trunc('month', max_date) THEN 1 ELSE 0 END AS is_complete_month
+    CASE WHEN calendar_date < date_trunc('month', max_date) THEN 1 ELSE 0 END AS is_complete_month,
+    -- Fiscal calendar. Group reporting runs on a fiscal year that starts in
+    -- October, so FY2024 covers 2023-10-01 .. 2024-09-30. The start month is
+    -- the single assumption here; changing 10 below re-bases every fiscal
+    -- column consistently. Documented in docs/technical_reference.md.
+    CASE
+        WHEN EXTRACT(month FROM calendar_date) >= 10
+        THEN EXTRACT(year FROM calendar_date)::INTEGER + 1
+        ELSE EXTRACT(year FROM calendar_date)::INTEGER
+    END AS fiscal_year,
+    'FY' || CASE
+        WHEN EXTRACT(month FROM calendar_date) >= 10
+        THEN EXTRACT(year FROM calendar_date)::INTEGER + 1
+        ELSE EXTRACT(year FROM calendar_date)::INTEGER
+    END AS fiscal_year_label,
+    ((EXTRACT(month FROM calendar_date)::INTEGER + 2) % 12) + 1 AS fiscal_month_number,
+    CAST(FLOOR(((EXTRACT(month FROM calendar_date)::INTEGER + 2) % 12) / 3.0) AS INTEGER) + 1 AS fiscal_quarter_number,
+    'FQ' || (CAST(FLOOR(((EXTRACT(month FROM calendar_date)::INTEGER + 2) % 12) / 3.0) AS INTEGER) + 1) AS fiscal_quarter_label,
+    CASE
+        WHEN EXTRACT(month FROM calendar_date) >= 10
+        THEN make_date(EXTRACT(year FROM calendar_date)::INTEGER, 10, 1)
+        ELSE make_date(EXTRACT(year FROM calendar_date)::INTEGER - 1, 10, 1)
+    END AS fiscal_year_start
 FROM calendar;
 
 CREATE OR REPLACE TABLE core.dim_customer AS
@@ -95,3 +117,58 @@ CREATE OR REPLACE TABLE core.dim_acquisition_source AS
 SELECT ROW_NUMBER() OVER (ORDER BY acquisition_source)::INTEGER AS acquisition_source_key,
        acquisition_source
 FROM (SELECT DISTINCT acquisition_source FROM stg.users);
+
+-- ---------------------------------------------------------------------
+-- 1. Conformed country dimension
+--
+-- TheLook's users.csv genuinely contains local-language spellings
+-- ("Espana" alongside "Spain", "Deutschland" alongside "Germany") which
+-- split a single market into two phantom markets in any country report.
+-- The seed maps every observed source value to a canonical country and a
+-- region, so regional reporting has one row per market.
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE core.dim_country AS
+SELECT
+    ROW_NUMBER() OVER (ORDER BY canonical_country, source_country_value)::INTEGER AS country_key,
+    source_country_value,
+    canonical_country,
+    region,
+    sub_region,
+    CAST(is_alias AS INTEGER) AS is_alias,
+    alias_reason
+FROM raw.country_master;
+
+-- ---------------------------------------------------------------------
+-- 1b. Star-schema dimensions for the month and market grains
+--
+-- core.dim_country is a MAPPING table: it holds one row per observed source
+-- spelling, so canonical_country repeats and it cannot serve as the "one"
+-- side of a relationship. The two dimensions below are the ones Power BI
+-- joins to, each with a genuinely unique key.
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE core.dim_market AS
+SELECT
+    ROW_NUMBER() OVER (ORDER BY canonical_country)::INTEGER AS market_key,
+    canonical_country,
+    region,
+    sub_region,
+    COUNT(*) AS source_spellings_mapped
+FROM core.dim_country
+WHERE canonical_country <> 'Unknown'
+GROUP BY canonical_country, region, sub_region;
+
+CREATE OR REPLACE TABLE core.dim_month AS
+SELECT DISTINCT
+    month_start,
+    CAST(strftime(month_start, '%Y%m') AS INTEGER) AS month_key,
+    year,
+    month_number,
+    month_name,
+    month_year,
+    quarter_label,
+    fiscal_year,
+    fiscal_year_label,
+    fiscal_quarter_label,
+    fiscal_month_number,
+    is_complete_month
+FROM core.dim_date;

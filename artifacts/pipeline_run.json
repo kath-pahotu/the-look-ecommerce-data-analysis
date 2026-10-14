@@ -8,6 +8,11 @@
     "inventory_events.csv",
     "distribution_centers.csv"
   ],
+  "reference_files": [
+    "seeds/country_master.csv",
+    "seeds/fx_budget_rates.csv",
+    "data/planning/regional_plan_submissions.csv"
+  ],
   "raw_row_counts": {
     "users": 100000,
     "products": 29120,
@@ -18,44 +23,192 @@
     "distribution_centers": 10
   },
   "sql_modules": [
+    "00_raw_quality.sql",
     "01_staging.sql",
     "02_core_dimensions.sql",
     "03_core_facts.sql",
     "04_mart_acquisition_funnel.sql",
-    "05_mart_commercial_customer.sql",
+    "05_mart_revenue_customer.sql",
     "06_mart_operations_inventory.sql",
-    "07_quality_and_snapshots.sql"
+    "07_quality_and_snapshots.sql",
+    "08_commercial_planning.sql",
+    "09_quality_commercial.sql"
   ],
   "power_bi_tables": [
-    {"schema": "core", "table": "dim_date", "rows": 1994},
-    {"schema": "core", "table": "dim_customer", "rows": 100000},
-    {"schema": "core", "table": "dim_product", "rows": 29120},
-    {"schema": "core", "table": "dim_distribution_center", "rows": 10},
-    {"schema": "core", "table": "dim_session_traffic_source", "rows": 5},
-    {"schema": "core", "table": "dim_acquisition_source", "rows": 5},
-    {"schema": "core", "table": "fact_order", "rows": 124814},
-    {"schema": "core", "table": "fact_order_item", "rows": 180862},
-    {"schema": "core", "table": "fact_session", "rows": 680862},
-    {"schema": "core", "table": "fact_inventory", "rows": 488146},
-    {"schema": "mart", "table": "funnel_stage_channel", "rows": 20},
-    {"schema": "mart", "table": "funnel_monthly_channel", "rows": 325},
-    {"schema": "mart", "table": "channel_quality", "rows": 5},
-    {"schema": "mart", "table": "acquisition_source_value", "rows": 5},
-    {"schema": "mart", "table": "cart_abandonment_segments", "rows": 22},
-    {"schema": "mart", "table": "sales_monthly", "rows": 65},
-    {"schema": "mart", "table": "customer_360", "rows": 80095},
-    {"schema": "mart", "table": "cohort_retention", "rows": 1936},
-    {"schema": "mart", "table": "product_performance_category", "rows": 36},
-    {"schema": "mart", "table": "product_performance_brand", "rows": 2755},
-    {"schema": "mart", "table": "geography_performance_country", "rows": 15},
-    {"schema": "mart", "table": "delivery_performance_dc", "rows": 10},
-    {"schema": "mart", "table": "operations_monthly", "rows": 65},
-    {"schema": "mart", "table": "return_risk_segments", "rows": 48},
-    {"schema": "mart", "table": "inventory_performance", "rows": 356}
+    {
+      "schema": "core",
+      "table": "dim_date",
+      "rows": 1994
+    },
+    {
+      "schema": "core",
+      "table": "dim_customer",
+      "rows": 100000
+    },
+    {
+      "schema": "core",
+      "table": "dim_product",
+      "rows": 29120
+    },
+    {
+      "schema": "core",
+      "table": "dim_distribution_center",
+      "rows": 10
+    },
+    {
+      "schema": "core",
+      "table": "dim_session_traffic_source",
+      "rows": 5
+    },
+    {
+      "schema": "core",
+      "table": "dim_acquisition_source",
+      "rows": 5
+    },
+    {
+      "schema": "core",
+      "table": "fact_order",
+      "rows": 124814
+    },
+    {
+      "schema": "core",
+      "table": "fact_order_item",
+      "rows": 180862
+    },
+    {
+      "schema": "core",
+      "table": "fact_session",
+      "rows": 680862
+    },
+    {
+      "schema": "core",
+      "table": "fact_inventory",
+      "rows": 488146
+    },
+    {
+      "schema": "mart",
+      "table": "funnel_stage_channel",
+      "rows": 20
+    },
+    {
+      "schema": "mart",
+      "table": "funnel_monthly_channel",
+      "rows": 325
+    },
+    {
+      "schema": "mart",
+      "table": "channel_quality",
+      "rows": 5
+    },
+    {
+      "schema": "mart",
+      "table": "acquisition_source_value",
+      "rows": 5
+    },
+    {
+      "schema": "mart",
+      "table": "cart_abandonment_segments",
+      "rows": 22
+    },
+    {
+      "schema": "mart",
+      "table": "sales_monthly",
+      "rows": 65
+    },
+    {
+      "schema": "mart",
+      "table": "customer_360",
+      "rows": 80095
+    },
+    {
+      "schema": "mart",
+      "table": "cohort_retention",
+      "rows": 1936
+    },
+    {
+      "schema": "mart",
+      "table": "product_performance_category",
+      "rows": 36
+    },
+    {
+      "schema": "mart",
+      "table": "product_performance_brand",
+      "rows": 2755
+    },
+    {
+      "schema": "mart",
+      "table": "geography_performance_country",
+      "rows": 13
+    },
+    {
+      "schema": "mart",
+      "table": "delivery_performance_dc",
+      "rows": 10
+    },
+    {
+      "schema": "mart",
+      "table": "operations_monthly",
+      "rows": 65
+    },
+    {
+      "schema": "mart",
+      "table": "return_risk_segments",
+      "rows": 48
+    },
+    {
+      "schema": "mart",
+      "table": "inventory_performance",
+      "rows": 356
+    },
+    {
+      "schema": "core",
+      "table": "dim_country",
+      "rows": 16
+    },
+    {
+      "schema": "core",
+      "table": "dim_market",
+      "rows": 13
+    },
+    {
+      "schema": "core",
+      "table": "dim_month",
+      "rows": 67
+    },
+    {
+      "schema": "core",
+      "table": "fact_plan",
+      "rows": 287
+    },
+    {
+      "schema": "mart",
+      "table": "actual_country_month",
+      "rows": 770
+    },
+    {
+      "schema": "mart",
+      "table": "plan_vs_actual_monthly",
+      "rows": 860
+    },
+    {
+      "schema": "mart",
+      "table": "plan_vs_actual_region",
+      "rows": 6
+    },
+    {
+      "schema": "mart",
+      "table": "price_volume_mix",
+      "rows": 108
+    },
+    {
+      "schema": "mart",
+      "table": "commercial_scorecard",
+      "rows": 9
+    }
   ],
   "qa_status": {
-    "WARN": 3,
-    "PASS": 18
+    "WARN": 7,
+    "PASS": 28
   },
-  "elapsed_seconds": 23.265
+  "elapsed_seconds": 21.818
 }

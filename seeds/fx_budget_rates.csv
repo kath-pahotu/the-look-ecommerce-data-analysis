@@ -1,0 +1,11 @@
+currency_code,currency_name,budget_rate_to_usd,rate_basis
+USD,US Dollar,1.0,Reporting currency
+EUR,Euro,1.08,Budget rate fixed at planning cycle open
+GBP,Pound Sterling,1.26,Budget rate fixed at planning cycle open
+PLN,Polish Zloty,0.25,Budget rate fixed at planning cycle open
+BRL,Brazilian Real,0.20,Budget rate fixed at planning cycle open
+COP,Colombian Peso,0.00025,Budget rate fixed at planning cycle open
+CNY,Chinese Yuan,0.14,Budget rate fixed at planning cycle open
+KRW,South Korean Won,0.00075,Budget rate fixed at planning cycle open
+JPY,Japanese Yen,0.0067,Budget rate fixed at planning cycle open
+AUD,Australian Dollar,0.66,Budget rate fixed at planning cycle open

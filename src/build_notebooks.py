@@ -195,11 +195,21 @@ raw_tables = {
         "SELECT table_name FROM information_schema.tables WHERE table_schema = 'raw'"
     ).fetchall()
 }
-expected_raw_tables = {
+# The source contract is asserted in two parts, because the warehouse now has
+# two kinds of input. Keeping them separate means adding a seed can never
+# quietly widen the transactional contract.
+expected_transactional = {
     "users", "products", "orders", "order_items", "events",
     "inventory_events", "distribution_centers",
 }
-assert raw_tables == expected_raw_tables, (raw_tables, expected_raw_tables)
+expected_reference = {"country_master", "fx_budget_rates", "plan_submissions"}
+
+transactional = raw_tables & expected_transactional
+assert transactional == expected_transactional, (transactional, expected_transactional)
+assert raw_tables - expected_transactional == expected_reference, (
+    raw_tables - expected_transactional,
+    expected_reference,
+)
 sorted(raw_tables)"""
         ),
         nbf.v4.new_markdown_cell("## Results\n\n### 2. Validate the event-to-session grain"),

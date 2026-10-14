@@ -30,8 +30,15 @@ def main() -> None:
 
     for script in (
         "advanced_analytics.py",
+        "forecasting.py",
+        "build_excel_pack.py",
         "render_outputs.py",
+        "render_commercial_figures.py",
         "build_notebooks.py",
+        "build_commercial_notebook.py",
+        "build_project_walkthrough.py",
+        "build_code_map.py",
+        "build_data_catalogue.py",
     ):
         run_command(
             [
@@ -47,6 +54,8 @@ def main() -> None:
         "notebooks/01_data_quality_and_core_analysis.ipynb",
         "notebooks/02_statistical_deep_dives.ipynb",
         "notebooks/03_event_sessionization_audit.ipynb",
+        "notebooks/05_commercial_planning_and_forecast.ipynb",
+        "notebooks/00_project_walkthrough.ipynb",
     ):
         run_command(
             [

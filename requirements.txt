@@ -12,3 +12,5 @@ nbformat>=5.10
 nbclient>=0.10
 pyodbc>=5.2
 Pillow>=10.0
+statsmodels>=0.14
+openpyxl>=3.1

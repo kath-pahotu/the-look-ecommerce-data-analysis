@@ -16,15 +16,36 @@ def run(project_root: Path) -> dict[str, object]:
     else:
         connection = duckdb.connect(str(database_path), read_only=True)
         try:
+            raw_blocking = connection.execute(
+                "SELECT COUNT(*) FROM qa.raw_test_results WHERE status = 'FAIL'"
+            ).fetchone()[0]
+            if raw_blocking:
+                errors.append(f"{raw_blocking} blocking source-level tests failed")
+
             blocking = connection.execute(
                 "SELECT COUNT(*) FROM qa.test_results WHERE status = 'FAIL'"
             ).fetchone()[0]
             if blocking:
                 errors.append(f"{blocking} blocking data-quality tests failed")
+
+            commercial_blocking = connection.execute(
+                "SELECT COUNT(*) FROM qa.plan_validation WHERE status = 'FAIL'"
+            ).fetchone()[0]
+            if commercial_blocking:
+                errors.append(
+                    f"{commercial_blocking} blocking commercial-layer tests failed"
+                )
         finally:
             connection.close()
 
-    for relative in ("README.md", "docs/analysis_and_findings.md", "docs/technical_reference.md"):
+    for relative in (
+        "README.md",
+        "docs/analysis_and_findings.md",
+        "docs/technical_reference.md",
+        "docs/commercial_analytics.md",
+        "seeds/country_master.csv",
+        "data/planning/regional_plan_submissions.csv",
+    ):
         if not (project_root / relative).exists():
             errors.append(f"Missing required file: {relative}")
 

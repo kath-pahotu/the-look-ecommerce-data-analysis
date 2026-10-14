@@ -13,3 +13,14 @@ dim_distribution_center,distribution_center_id,fact_inventory,distribution_cente
 dim_session_traffic_source,traffic_source,fact_session,traffic_source,one-to-many,single
 dim_acquisition_source,acquisition_source,fact_order,acquisition_source,one-to-many,single
 dim_acquisition_source,acquisition_source,fact_order_item,acquisition_source,one-to-many,single
+dim_month,month_start,fact_plan,plan_month,one-to-many,single
+dim_market,canonical_country,fact_plan,canonical_country,one-to-many,single
+dim_month,month_start,forecast_monthly,month_start,one-to-many,single
+dim_month,month_start,forecast_vs_plan,month_start,one-to-many,single
+dim_month,month_start,forecast_scenarios,month_start,one-to-many,single
+dim_market,canonical_country,plan_vs_actual_monthly,canonical_country,one-to-many,single
+dim_month,month_start,plan_vs_actual_monthly,month_start,one-to-many,single
+dim_month,month_start,actual_country_month,month_start,one-to-many,single
+dim_market,canonical_country,actual_country_month,canonical_country,one-to-many,single
+dim_month,month_start,forecast_country_month,month_start,one-to-many,single
+dim_market,canonical_country,forecast_country_month,canonical_country,one-to-many,single

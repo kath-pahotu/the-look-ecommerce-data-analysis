@@ -1,0 +1,156 @@
+-- =====================================================================
+-- measures_commercial.dax
+-- Measures for pages 8 (Plan & Performance) and 9 (Forecast & Scenarios).
+--
+-- Load order in Power BI:
+--   1. Import the new CSVs from data/processed/power_bi/csv/
+--   2. Create the relationships listed in model_relationships.csv
+--   3. Paste these measures into a measure table named "_Commercial"
+--
+-- Design note. fact_plan is at country x month grain while fact_order_item
+-- is at item grain, so they are NOT joined directly. Both connect to
+-- dim_date and dim_country, and the measures below resolve through those
+-- shared dimensions. This keeps the model a star and avoids a fact-to-fact
+-- relationship, consistent with the rest of the report.
+-- =====================================================================
+
+-- ------------------------------------------------------------------ PLAN
+
+[Plan Net Sales] =
+SUM ( 'fact_plan'[plan_net_sales_usd] )
+
+[Plan Units] =
+SUM ( 'fact_plan'[plan_units] )
+
+[Plan Achievement %] =
+DIVIDE ( [Net Sales], [Plan Net Sales] )
+
+[Plan Variance] =
+[Net Sales] - [Plan Net Sales]
+
+[Plan Variance %] =
+DIVIDE ( [Plan Variance], [Plan Net Sales] )
+
+-- RAG band used by the conditional formatting rule on the variance table.
+-- Returns a sort key so the legend orders Red, Amber, Green.
+[Plan Status] =
+VAR Achievement = [Plan Achievement %]
+RETURN
+    SWITCH (
+        TRUE (),
+        ISBLANK ( [Plan Net Sales] ), "No plan",
+        Achievement >= 1,    "On or above plan",
+        Achievement >= 0.95, "Within 5% of plan",
+        "Below plan"
+    )
+
+[Markets Below Plan] =
+CALCULATE (
+    DISTINCTCOUNT ( 'plan_vs_actual_monthly'[canonical_country] ),
+    FILTER (
+        'plan_vs_actual_monthly',
+        'plan_vs_actual_monthly'[achievement_rate] < 1
+            && 'plan_vs_actual_monthly'[is_complete_month] = 1
+            && 'plan_vs_actual_monthly'[in_plan_horizon] = 1
+    )
+)
+
+-- ------------------------------------------------- PRICE-VOLUME-MIX
+
+[Volume Effect] =
+SUM ( 'price_volume_mix'[volume_effect] )
+
+[Mix Effect] =
+SUM ( 'price_volume_mix'[mix_effect] )
+
+[Price Effect] =
+SUM ( 'price_volume_mix'[price_effect] )
+
+[Total Variance] =
+SUM ( 'price_volume_mix'[total_variance] )
+
+-- Proof the decomposition is exact. Shown as a card on page 8 so a reader
+-- can see the bridge ties rather than being asked to trust it.
+[Bridge Residual] =
+[Volume Effect] + [Mix Effect] + [Price Effect] - [Total Variance]
+
+[Volume Share of Variance] =
+DIVIDE ( [Volume Effect], [Total Variance] )
+
+[Prior ASP] =
+DIVIDE (
+    SUM ( 'price_volume_mix'[revenue_prior] ),
+    SUM ( 'price_volume_mix'[units_prior] )
+)
+
+[Current ASP] =
+DIVIDE (
+    SUM ( 'price_volume_mix'[revenue_current] ),
+    SUM ( 'price_volume_mix'[units_current] )
+)
+
+[ASP Change %] =
+DIVIDE ( [Current ASP] - [Prior ASP], [Prior ASP] )
+
+-- ---------------------------------------------------------- FORECAST
+
+[Forecast Net Sales] =
+SUM ( 'forecast_monthly'[forecast_net_sales_usd] )
+
+[Expected Net Sales] =
+SUM ( 'forecast_vs_plan'[expected_net_sales_usd] )
+
+[Expected Achievement %] =
+DIVIDE (
+    SUM ( 'forecast_vs_plan'[expected_net_sales_usd] ),
+    SUM ( 'forecast_vs_plan'[plan_net_sales_usd] )
+)
+
+[Gap to Plan] =
+SUM ( 'forecast_vs_plan'[gap_to_plan_usd] )
+
+[Backtest MAPE] =
+MIN ( 'forecast_accuracy'[mape] )
+
+[Champion Model] =
+CALCULATE (
+    MAX ( 'forecast_accuracy'[model] ),
+    FILTER ( 'forecast_accuracy', 'forecast_accuracy'[mape] = MIN ( 'forecast_accuracy'[mape] ) )
+)
+
+-- ------------------------------------------------------- SCENARIOS
+
+[Scenario Net Sales] =
+SUM ( 'forecast_scenarios'[forecast_net_sales_usd] )
+
+[Scenario Net Profit] =
+SUM ( 'forecast_scenarios'[forecast_net_profit_usd] )
+
+[Scenario vs Plan] =
+[Scenario Net Sales] - [Plan Net Sales]
+
+-- What-if parameter. Create a numeric parameter named "Volume Adjustment"
+-- in Power BI with range -20% to +20%, increment 1%, then use this measure
+-- so the user can flex the forecast live in the meeting.
+[Adjusted Forecast] =
+[Forecast Net Sales] * ( 1 + SELECTEDVALUE ( 'Volume Adjustment'[Volume Adjustment], 0 ) )
+
+[Adjusted Achievement %] =
+DIVIDE ( [Adjusted Forecast], [Plan Net Sales] )
+
+-- ------------------------------------------------- DATA QUALITY CARDS
+
+[Blocking Test Failures] =
+CALCULATE (
+    COUNTROWS ( 'plan_validation' ),
+    'plan_validation'[status] = "FAIL"
+)
+
+[Quarantined Plan Rows] =
+COUNTROWS ( 'plan_rejects' )
+
+[Plan Rows Accepted %] =
+DIVIDE (
+    COUNTROWS ( 'fact_plan' ),
+    COUNTROWS ( 'fact_plan' ) + COUNTROWS ( 'plan_rejects' )
+)

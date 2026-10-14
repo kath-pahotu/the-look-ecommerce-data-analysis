@@ -1,36 +1,18 @@
 CREATE SCHEMA IF NOT EXISTS qa;
 
+-- Source-level checks (raw primary keys, session_id presence, reference-data
+-- coverage) are NOT here. They live in 00_raw_quality.sql and run before any
+-- model is built, so a broken source stops the build instead of being caught
+-- after 26 marts have already been computed on it.
+--
+-- Everything below needs a modelled table to compare against, which is why it
+-- cannot run any earlier than this.
 CREATE OR REPLACE TABLE qa.test_results AS
 WITH checks AS (
-    SELECT 'users_primary_key_unique' AS check_name, 'raw' AS layer, 'CRITICAL' AS severity,
-           COUNT(*)::BIGINT AS failure_count, (SELECT COUNT(*) FROM raw.users)::BIGINT AS denominator,
-           1 AS blocking, 'users.id must be unique' AS notes
-    FROM (SELECT id FROM raw.users GROUP BY id HAVING COUNT(*) > 1)
-    UNION ALL
-    SELECT 'products_primary_key_unique', 'raw', 'CRITICAL', COUNT(*), (SELECT COUNT(*) FROM raw.products), 1,
-           'products.id must be unique'
-    FROM (SELECT id FROM raw.products GROUP BY id HAVING COUNT(*) > 1)
-    UNION ALL
-    SELECT 'orders_primary_key_unique', 'raw', 'CRITICAL', COUNT(*), (SELECT COUNT(*) FROM raw.orders), 1,
-           'orders.order_id must be unique'
-    FROM (SELECT order_id FROM raw.orders GROUP BY order_id HAVING COUNT(*) > 1)
-    UNION ALL
-    SELECT 'order_items_primary_key_unique', 'raw', 'CRITICAL', COUNT(*), (SELECT COUNT(*) FROM raw.order_items), 1,
-           'order_items.id must be unique'
-    FROM (SELECT id FROM raw.order_items GROUP BY id HAVING COUNT(*) > 1)
-    UNION ALL
-    SELECT 'events_primary_key_unique', 'raw', 'CRITICAL', COUNT(*), (SELECT COUNT(*) FROM raw.events), 1,
-           'events.id must be unique'
-    FROM (SELECT id FROM raw.events GROUP BY id HAVING COUNT(*) > 1)
-    UNION ALL
-    SELECT 'events_session_id_present', 'raw', 'CRITICAL', COUNT(*), (SELECT COUNT(*) FROM raw.events), 1,
-           'Every event must have a nonblank session_id before sessionization'
-    FROM raw.events
-    WHERE session_id IS NULL OR TRIM(CAST(session_id AS VARCHAR)) = ''
-    UNION ALL
-    SELECT 'derived_sessions_primary_key_unique', 'stg', 'CRITICAL', COUNT(*),
-           (SELECT COUNT(*) FROM stg.sessions), 1,
-           'The event-derived stg.sessions view must have one row per session_id'
+    SELECT 'derived_sessions_primary_key_unique' AS check_name, 'stg' AS layer,
+           'CRITICAL' AS severity, COUNT(*)::BIGINT AS failure_count,
+           (SELECT COUNT(*) FROM stg.sessions)::BIGINT AS denominator, 1 AS blocking,
+           'The event-derived stg.sessions view must have one row per session_id' AS notes
     FROM (SELECT session_id FROM stg.sessions GROUP BY session_id HAVING COUNT(*) > 1)
     UNION ALL
     SELECT 'session_attributes_consistent_within_session', 'stg', 'CRITICAL', COUNT(*),
@@ -90,10 +72,6 @@ WITH checks AS (
     SELECT 'return_not_before_delivery', 'core', 'HIGH', COUNT(*), (SELECT COUNT(*) FROM core.fact_order_item), 1,
            'Return timestamps must follow delivery'
     FROM core.fact_order_item WHERE returned_at < delivered_at
-    UNION ALL
-    SELECT 'events_user_id_missing', 'raw', 'INFO', COUNT(*), (SELECT COUNT(*) FROM raw.events), 0,
-           'Event user_id is sparse; session customer_id uses the one nonnull ID available within a session'
-    FROM raw.events WHERE user_id IS NULL
     UNION ALL
     SELECT 'partial_latest_month', 'mart', 'INFO', COUNT(*), COUNT(*), 0,
            'The maximum source month is partial and excluded from default period comparisons'

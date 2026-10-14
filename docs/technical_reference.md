@@ -15,6 +15,13 @@ flowchart LR
     D --> H["qa: tests and reconciliations"]
     G --> I["Advanced Power BI tables"]
     H --> J["Private review pack"]
+    P1["Regional plan submissions (2nd source)"] --> P2["stg.plan_submissions: harmonised + FX"]
+    S1["seeds: country master, budget FX rates"] --> P2
+    P2 --> P3["core.fact_plan"]
+    P2 --> P4["qa.plan_rejects: quarantine"]
+    P3 --> E
+    D --> E
+    E --> K["Forecast, scenarios, Excel pack"]
 ```
 
 ### Layer responsibilities
@@ -25,8 +32,21 @@ flowchart LR
 | `stg` | Renaming, casting, normalization, privacy boundary, and event-derived sessions | Views (computed live, not stored) |
 | `core` | Star-schema dimensions and facts at declared grain | Replace on rebuild |
 | `mart` | Decision-oriented aggregates and analytical tables | Replace on rebuild |
-| `qa` | Row rules, lineage checks, reconciliations, severity, and status | Replace on rebuild |
+| `qa` | Row rules, lineage checks, reconciliations, severity, and status. Split across `raw_test_results` (source gate), `test_results` (warehouse) and `plan_validation` (commercial) | Replace on rebuild |
 | `data/processed` | Power BI and analysis exports | Replace on rebuild |
+
+### Second source: commercial planning
+
+| Layer | Object | Notes |
+|---|---|---|
+| `raw` | `plan_submissions`, `country_master`, `fx_budget_rates` | One planning file plus two committed seeds |
+| `stg` | `stg.plan_submissions` | Trim, harmonise country spelling, convert local currency at budget rate, raise one flag per validation rule |
+| `qa` | `qa.plan_rejects` | Quarantined rows with a stated reason; does not block the build |
+| `core` | `core.fact_plan`, `core.dim_market`, `core.dim_month` | Accepted plan at country x month; two star dimensions with genuinely unique keys |
+| `mart` | `plan_vs_actual_monthly`, `plan_vs_actual_region`, `price_volume_mix`, `commercial_scorecard`, `forecast_*` | Decision layer for the commercial pages |
+
+Full methodology, including what this dataset cannot support, is in
+[`commercial_analytics.md`](commercial_analytics.md).
 
 ### Declared grains
 
@@ -36,6 +56,11 @@ flowchart LR
 - `fact_inventory`: one row per inventory item.
 - `customer_360`: one row per purchasing customer.
 - `cohort_retention`: one row per cohort-month and months-since-first-order.
+- `fact_plan`: one row per canonical country per plan month.
+- `dim_market`: one row per canonical country. Distinct from `dim_country`, which is a mapping table holding one row per observed source spelling and therefore cannot be the one side of a relationship.
+- `dim_month`: one row per month, for the month-grain plan and forecast facts.
+- `price_volume_mix`: one row per comparison, department and category.
+- `commercial_scorecard`: one row per KPI for the latest complete month.
 
 No fact-to-fact relationships are used in Power BI.
 
@@ -108,9 +133,52 @@ The pipeline blocks the build when:
 - Distinct event session IDs do not reconcile to fact-session rows
 - Source event rows do not reconcile to the sum of session event counts
 
+## Fiscal calendar
+
+`core.dim_date` carries both a calendar and a fiscal view. The group fiscal
+year is assumed to start on **1 October**, so FY2024 covers 2023-10-01 to
+2024-09-30. The start month is the single assumption: changing the literal
+`10` in `sql/duckdb/02_core_dimensions.sql` re-bases `fiscal_year`,
+`fiscal_quarter_number`, `fiscal_month_number` and `fiscal_year_start`
+consistently. Fiscal columns are additive to the existing calendar columns and
+no existing mart was changed to accommodate them.
+
 ## Testing & validation
 
-The `qa` schema runs primary-key uniqueness, source-to-model row reconciliation, referential integrity, and timestamp checks. `src/validate_project.py` confirms the warehouse exists and all QA tests pass before the build completes. Notebooks 01 and 03 execute top-to-bottom as part of the build.
+### Two-phase gate
+
+Quality checks run at two points, not one, and the split is deliberate.
+
+**Phase 1 - source gate (`sql/duckdb/00_raw_quality.sql`).** Nine checks that
+need nothing but the `raw` schema: primary-key uniqueness on the five source
+tables, `session_id` presence before sessionization is attempted, and
+reference-data coverage - every country spelling in `users.csv` must map to a
+canonical market, and every currency in the plan file must have a budget FX
+rate. These run **before any model is built**. A failure here stops the build
+immediately, so a broken extract is never modelled.
+
+**Phase 2 - warehouse gate (`07`, `09`).** Twenty-six checks that compare one
+layer against another and therefore cannot run earlier: source-to-model row
+reconciliation, referential integrity, timestamp ordering, plan consolidation,
+FX reproduction, and the price-volume-mix residual.
+
+**Export gate.** `src/pipeline.py` calls `assert_no_blocking_failures` after
+each phase. Nothing is exported until both have passed, so a failing build
+cannot leave stale CSVs, a stale Excel pack or stale figures on disk for
+someone to open by mistake.
+
+The reference-coverage checks in phase 1 are the ones worth noticing: they
+catch a *new* source value rather than a known bad one. If TheLook ever
+emitted a fourteenth country spelling, the build would stop and name it
+instead of silently producing a market with no plan attached.
+
+`qa.plan_validation` adds twelve commercial-layer checks, and
+`qa.reconciliation_statement` publishes a readable source-to-mart statement
+with row and value deltas at each stage.
+`src/validate_project.py` runs last and confirms the warehouse exists and
+that `qa.raw_test_results`, `qa.test_results` and `qa.plan_validation` all
+contain no `FAIL` rows. It is a backstop rather than the primary gate - by the
+time it runs, the pipeline has already refused to export anything that failed. Notebooks 01 and 03 execute top-to-bottom as part of the build.
 
 ## Assumptions & limitations
 
@@ -130,7 +198,9 @@ The `qa` schema runs primary-key uniqueness, source-to-model row reconciliation,
 ### Unsupported analyses
 
 - No marketing cost → ROAS/CAC cannot be calculated.
-- No promotion/discount field → pricing elasticity cannot be estimated.
+- No promotion/discount field → pricing elasticity cannot be estimated. See `commercial_analytics.md` section 9 for the full list with the data each would require.
+- Plan data is constructed by `src/build_plan_source.py` from a stated rule, because TheLook ships no budget data. It is labelled as a constructed scenario wherever it appears.
+- Forecast accuracy is optimistic: the synthetic growth curve is smoother than real demand.
 - No product lines linked to cart events → product-level cart abandonment unsupported.
 - No experiment assignment/exposure data → historical A/B effects cannot be estimated.
 - No external delivery benchmark included.

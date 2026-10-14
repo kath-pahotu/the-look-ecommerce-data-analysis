@@ -1,0 +1,49 @@
+{
+  "champion_model": "seasonal_naive_drift",
+  "backtest_origins": 24,
+  "backtest_horizon": 8,
+  "backtest_note": "Models are scored across all 8 steps of the forecast horizon, not one month ahead. Scoring at one month selects a different model - see docs/forecast_review.md.",
+  "model_scores": [
+    {
+      "model": "seasonal_naive_drift",
+      "mape": 0.0800244783988406,
+      "mape_first_step": 0.06457007576607551,
+      "mape_final_step": 0.11529421225514007,
+      "worst_month_ape": 0.39408325588782117,
+      "bias": -0.007107227671329379,
+      "horizon": 8,
+      "origins": 24,
+      "folds": 192
+    },
+    {
+      "model": "holt_winters_log",
+      "mape": 0.2597518908710457,
+      "mape_first_step": 0.08260110172495301,
+      "mape_final_step": 0.4351275923003601,
+      "worst_month_ape": 1.6306427180374872,
+      "bias": 0.08254531307004832,
+      "horizon": 8,
+      "origins": 24,
+      "folds": 192
+    },
+    {
+      "model": "seasonal_naive",
+      "mape": 0.4241804456200648,
+      "mape_first_step": 0.41659902421691103,
+      "mape_final_step": 0.44208002340018987,
+      "worst_month_ape": 0.6489190341301906,
+      "bias": -0.4241804456200647,
+      "horizon": 8,
+      "origins": 24,
+      "folds": 192
+    }
+  ],
+  "last_actual_month": "2024-04-01",
+  "forecast_months": 8,
+  "expected_vs_plan_achievement": 1.19608924164762,
+  "scenarios": [
+    "Base",
+    "Upside",
+    "Downside"
+  ]
+}
