@@ -150,3 +150,9 @@ This document covers what the transactional data says about what **happened**. T
 - Order and item status behave like snapshot categories. Net sales excludes Cancelled and Returned; gross sales remains available.
 - Product-level cart abandonment cannot be attributed reliably because cart/purchase events do not contain cart contents or order IDs.
 - External delivery benchmarks were not added; set SLA targets based on the portfolio scenario or verified market sources.
+
+## Scope of the recommendations
+
+Interpret channel, customer and inventory actions as hypotheses illustrated on synthetic data. No marketing spend supports a CAC/ROAS ranking; an aged-stock snapshot does not measure the future sale hazard of unsold items. Flat abandonment across groups does not isolate a checkout cause. The existing Net Profit measure subtracts retained product cost from net sales and excludes unprovided operating/acquisition costs.
+
+The return model's weak ROC-AUC measures ranking performance. Compare predicted probabilities with outcomes separately before making calibration claims. No additional calibration analysis or intervention test is claimed in this documentation update.
